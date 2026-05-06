@@ -248,3 +248,50 @@ See NanoGPT's official documentation:
 ## License
 
 MIT
+
+## Using with Hermes Agent
+
+This skill can be loaded directly into [Hermes Agent](https://hermes-agent.nousresearch.com) so your AI agent can scrape TikTok, fetch transcripts, and research topics autonomously.
+
+### Installation
+
+```bash
+# From anywhere in your Hermes environment:
+git clone https://github.com/jcrabapple/hermes-skills.git /tmp/hermes-skills
+cp -r /tmp/hermes-skills/nanogpt-tiktok ~/.hermes/skills/social-media/nanogpt-tiktok
+rm -rf /tmp/hermes-skills
+```
+
+Or symlink to keep it updated:
+
+```bash
+git clone https://github.com/jcrabapple/hermes-skills.git ~/hermes-skills
+ln -s ~/hermes-skills/nanogpt-tiktok ~/.hermes/skills/social-media/nanogpt-tiktok
+```
+
+### Configure API Key
+
+Add your NanoGPT API key to Hermes' environment file:
+
+```bash
+echo 'NANOGPT_API_KEY=sk-nano-your-key-here' >> ~/.hermes/.env
+```
+
+### Usage Within Hermes
+
+Once installed, Hermes Agent can load the skill with `skill_view(name='nanogpt-tiktok')` and invoke the CLI or raw API to:
+
+- Scrape a TikTok by URL and return the transcript
+- Search hashtags or keywords for trend research
+- Pull creator profiles and engagement metrics
+- Feed scraped content into research workflows (deep research, Obsidian, blogging)
+
+Example agent prompt:
+
+> "Load the nanogpt-tiktok skill, scrape this TikTok URL, get the transcript, and do deep research on the topics discussed."
+
+### How It Works in Hermes
+
+The `SKILL.md` file in the skill directory is a Hermes-native skill definition. When loaded, it makes the tool surface available to the agent — the agent can call the Python CLI, make curl requests, or use the transcript extraction logic automatically based on your instructions.
+
+The skill is designed to be composable: you can chain it with other skills like `deep-research` (for fact-checking claims), `obsidian` (for saving research), or `pico-sh` (for blogging) to build end-to-end TikTok research pipelines.
