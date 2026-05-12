@@ -1,0 +1,77 @@
+# Concert Monitor Configuration
+#
+# Copy this file to config.yaml and customize for your area.
+#
+# metro_areas: List of metro areas to monitor
+#   name: Display name for the area
+#   venues: List of venues to check
+#     name: Venue name (used in search queries)
+#     aliases: Alternative names (optional)
+#
+# delivery: How to deliver the digest
+#   method: email | telegram | discord | local
+#   target: email address, chat ID, or file path
+#
+# weeks_ahead: How many weeks to look (default: 2)
+
+metro_areas:
+  - name: "Washington, DC"
+    venues:
+      - name: "9:30 Club"
+      - name: "The Anthem"
+      - name: "Lincoln Theatre"
+      - name: "Black Cat"
+      - name: "DC9"
+      - name: "The Howard Theatre"
+      - name: "Capital One Arena"
+        aliases: ["Capital One Arena DC"]
+      - name: "The Kennedy Center"
+      - name: "The Fillmore Silver Spring"
+        aliases: ["Fillmore Silver Spring"]
+      - name: "Merriweather Post Pavilion"
+        aliases: ["Merriweather"]
+      - name: "MGM National Harbor"
+
+  - name: "Baltimore, MD"
+    venues:
+      - name: "Baltimore Soundstage"
+        aliases: ["Soundstage"]
+      - name: "Nevermore Hall"
+        aliases: ["Rams Head Live"]
+      - name: "The Ottobar"
+        aliases: ["Ottobar"]
+      - name: "CFG Bank Arena"
+        aliases: ["Baltimore Arena"]
+      - name: "Lyric Baltimore"
+
+# Example: Austin, TX
+# - name: "Austin, TX"
+#   venues:
+#     - name: "Stubb's BBQ"
+#       aliases: ["Stubbs"]
+#     - name: "Emo's Austin"
+#     - name: "Mohawk Austin"
+#     - name: "ACL Live at The Moody Theater"
+#       aliases: ["Moody Theater"]
+#     - name: "The Continental Club"
+#     - name: "Antone's Nightclub"
+#       aliases: ["Antones"]
+
+# Example: Nashville, TN
+# - name: "Nashville, TN"
+#   venues:
+#     - name: "Ryman Auditorium"
+#     - name: "Bridgestone Arena"
+#     - name: "The Bluebird Cafe"
+#     - name: "Ascend Amphitheater"
+#     - name: "The Basement East"
+#     - name: "Marathon Music Works"
+
+delivery:
+  method: email
+  target: "your-email@example.com"
+  # For Telegram: use your chat ID (e.g. "123456789")
+  # For Discord: use your channel ID (e.g. "discord:123456789")
+  # For local: use a file path (e.g. "/tmp/concerts.md")
+
+weeks_ahead: 2
