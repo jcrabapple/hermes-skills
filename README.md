@@ -19,6 +19,7 @@ When you ask Hermes to do something, it scans its available skills and loads the
 | Skill | What it does |
 |-------|-------------|
 | [`nanogpt-tiktok`](nanogpt-tiktok/) | Scrape TikTok hashtags, profiles, keyword searches, and video URLs with ASR transcripts via NanoGPT API |
+| [`nanogpt-linkedin`](nanogpt-linkedin/) | Scrape LinkedIn profile data (name, title, company, email, education) via NanoGPT API |
 
 *More skills coming — PRs welcome.*
 
