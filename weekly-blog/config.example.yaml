@@ -1,0 +1,45 @@
+# Weekly Blog Configuration
+#
+# Copy this file to config.yaml and customize for your setup.
+#
+# blog_name: Display name for your blog
+# blog_url: Public URL where posts are published
+# blog_ssh_target: SSH/rsync destination (user@host)
+# obsidian_vault_path: Path to your Obsidian vault
+# topic_pool_file: Path to your topic list file
+# schedule: Cron expression for when to publish
+
+# --- Blog Platform ---
+# prose.sh is a free SSH-based static blog host.
+# Set up at https://prose.sh — just SSH to publish.
+# You can also use any server that accepts rsync over SSH.
+
+blog_name: "My Blog"
+blog_url: "https://yourusername.prose.sh"
+blog_ssh_target: "prose.sh:/"
+
+# For a personal server:
+# blog_url: "https://blog.example.com"
+# blog_ssh_target: "user@yourserver:/var/www/blog/"
+
+# --- Obsidian ---
+# The pipeline saves research reports to your vault's Research folder.
+
+obsidian_vault_path: "~/Documents/Obsidian Vault"
+
+# --- Topic Pool ---
+# A text file with one topic per line. The agent picks randomly
+# and removes topics after they're published. Refresh periodically.
+
+topic_pool_file: "~/.hermes/skills/automation/weekly-blog/topic_pool.txt"
+
+# --- Schedule ---
+# Default: Monday, Wednesday, Friday at 10am Eastern
+
+schedule: "0 10 * * 1,3,5"
+timezone: "America/New_York"
+
+# Other schedule examples:
+# Weekly (Mondays only):  "0 10 * * 1"
+# Twice weekly (Tue/Fri): "0 10 * * 2,5"
+# Daily:                  "0 10 * * *"
