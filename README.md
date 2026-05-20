@@ -1,6 +1,6 @@
 # Hermes Skills 🧠⚡
 
-**Reusable skills and tools for [Hermes Agent](https://hermes-agent.nousresearch.com) — your AI's procedural memory.**
+**Reusable skills and tools for [Hermes Agent](https://hermes-agent.nousresearch.com/) — your AI's procedural memory.**
 
 Hermes Agent is an open-source AI assistant framework that can use tools, run code, and persist context across sessions. This repo is a collection of **skills**: packaged expertise that gives Hermes domain-specific capabilities on demand.
 
@@ -16,36 +16,33 @@ When you ask Hermes to do something, it scans its available skills and loads the
 
 ## Skills in This Repo
 
-### Resume & Career Development
+### Job Search & Career Development (21 skills)
+
+All resume and career skills are organized under [`job-search/`](job-search/) for easy installation as a complete career toolkit.
 
 | Skill | What it does |
 |-------|-------------|
-| [`resume-workflow-orchestrator`](resume-workflow-orchestrator/) | Meta-skill that routes to the right resume skill and chains workflows together |
-| [`tailored-resume-generator`](tailored-resume-generator/) | Analyzes job descriptions and generates tailored resumes with DOCX conversion |
-| [`job-description-analyzer`](job-description-analyzer/) | Analyze job postings, calculate match scores, identify gaps, create application strategy |
-| [`cover-letter-generator`](cover-letter-generator/) | Create personalized, compelling cover letters from resume + job description |
-| [`resume-ats-optimizer`](resume-ats-optimizer/) | Optimize resumes for Applicant Tracking Systems, check ATS compatibility, analyze keyword match |
-| [`resume-bullet-writer`](resume-bullet-writer/) | Transform weak bullets into achievement-focused statements with metrics and impact |
-| [`resume-quantifier`](resume-quantifier/) | Find opportunities to add metrics and estimate numbers when exact data unavailable |
-| [`resume-formatter`](resume-formatter/) | Ensure ATS-friendly formatting and create clean, scannable layouts |
-| [`tech-resume-optimizer`](tech-resume-optimizer/) | Optimize resumes for software engineering, PM, and technical roles |
-| [`career-changer-translator`](career-changer-translator/) | Translate skills from one industry to another, identify transferable skills |
-| [`executive-resume-writer`](executive-resume-writer/) | Create C-suite and VP level resumes emphasizing strategic leadership |
-| [`academic-cv-builder`](academic-cv-builder/) | Format CVs for academic positions with publications, grants, teaching |
-| [`creative-portfolio-resume`](creative-portfolio-resume/) | Balance visual design with ATS compatibility for creative roles |
-| [`resume-section-builder`](resume-section-builder/) | Create targeted sections optimized for different experience levels and roles |
-
-### Supporting Career Skills
-
-| Skill | What it does |
-|-------|-------------|
-| [`salary-negotiation-prep`](salary-negotiation-prep/) | Research market rates, build negotiation strategy, create counter-offer scripts |
-| [`interview-prep-generator`](interview-prep-generator/) | Generate STAR stories, practice questions, talking points from resume |
-| [`offer-comparison-analyzer`](offer-comparison-analyzer/) | Compare multiple job offers side-by-side with total compensation analysis |
-| [`resume-version-manager`](resume-version-manager/) | Track different resume versions, maintain master resume, manage tailored versions |
-| [`portfolio-case-study-writer`](portfolio-case-study-writer/) | Transform resume bullets into detailed portfolio case studies |
-| [`reference-list-builder`](reference-list-builder/) | Format professional references properly and prepare reference materials |
-| [`linkedin-profile-optimizer`](linkedin-profile-optimizer/) | Sync resume with LinkedIn, optimize for searchability and engagement |
+| [`job-search/resume-workflow-orchestrator`](job-search/resume-workflow-orchestrator/) | Meta-skill that routes to the right resume skill and chains workflows together |
+| [`job-search/tailored-resume-generator`](job-search/tailored-resume-generator/) | Analyzes job descriptions and generates tailored resumes with DOCX conversion |
+| [`job-search/job-description-analyzer`](job-search/job-description-analyzer/) | Analyze job postings, calculate match scores, identify gaps, create application strategy |
+| [`job-search/cover-letter-generator`](job-search/cover-letter-generator/) | Create personalized, compelling cover letters from resume + job description |
+| [`job-search/resume-ats-optimizer`](job-search/resume-ats-optimizer/) | Optimize resumes for Applicant Tracking Systems, check ATS compatibility, analyze keyword match |
+| [`job-search/resume-bullet-writer`](job-search/resume-bullet-writer/) | Transform weak bullets into achievement-focused statements with metrics and impact |
+| [`job-search/resume-quantifier`](job-search/resume-quantifier/) | Find opportunities to add metrics and estimate numbers when exact data unavailable |
+| [`job-search/resume-formatter`](job-search/resume-formatter/) | Ensure ATS-friendly formatting and create clean, scannable layouts |
+| [`job-search/tech-resume-optimizer`](job-search/tech-resume-optimizer/) | Optimize resumes for software engineering, PM, and technical roles |
+| [`job-search/career-changer-translator`](job-search/career-changer-translator/) | Translate skills from one industry to another, identify transferable skills |
+| [`job-search/executive-resume-writer`](job-search/executive-resume-writer/) | Create C-suite and VP level resumes emphasizing strategic leadership |
+| [`job-search/academic-cv-builder`](job-search/academic-cv-builder/) | Format CVs for academic positions with publications, grants, teaching |
+| [`job-search/creative-portfolio-resume`](job-search/creative-portfolio-resume/) | Balance visual design with ATS compatibility for creative roles |
+| [`job-search/resume-section-builder`](job-search/resume-section-builder/) | Create targeted sections optimized for different experience levels and roles |
+| [`job-search/salary-negotiation-prep`](job-search/salary-negotiation-prep/) | Research market rates, build negotiation strategy, create counter-offer scripts |
+| [`job-search/interview-prep-generator`](job-search/interview-prep-generator/) | Generate STAR stories, practice questions, talking points from resume |
+| [`job-search/offer-comparison-analyzer`](job-search/offer-comparison-analyzer/) | Compare multiple job offers side-by-side with total compensation analysis |
+| [`job-search/resume-version-manager`](job-search/resume-version-manager/) | Track different resume versions, maintain master resume, manage tailored versions |
+| [`job-search/portfolio-case-study-writer`](job-search/portfolio-case-study-writer/) | Transform resume bullets into detailed portfolio case studies |
+| [`job-search/reference-list-builder`](job-search/reference-list-builder/) | Format professional references properly and prepare reference materials |
+| [`job-search/linkedin-profile-optimizer`](job-search/linkedin-profile-optimizer/) | Sync resume with LinkedIn, optimize for searchability and engagement |
 
 ### Social Media & Content
 
@@ -71,11 +68,12 @@ When you ask Hermes to do something, it scans its available skills and loads the
 ## Quick Start
 
 ```bash
-# Clone the skills
+# Clone all skills
 git clone https://github.com/jcrabapple/hermes-skills.git ~/.hermes/skills/custom/
 
-# Or install individual skills from within Hermes
-# /skill add jcrabapple/hermes-skills/nanogpt-tiktok
+# Or install just the job search toolkit
+git clone https://github.com/jcrabapple/hermes-skills.git
+cp -r hermes-skills/job-search ~/.hermes/skills/
 ```
 
 Each skill's directory is self-contained with its own README and usage docs.
