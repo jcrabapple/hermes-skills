@@ -57,6 +57,7 @@ All resume and career skills are organized under [`job-search/`](job-search/) fo
 | Skill | What it does |
 |-------|-------------|
 | [`valyu`](valyu/) | Search web + 36+ proprietary data sources (arXiv, PubMed, SEC filings, clinical trials, patents, financial data) via Valyu API |
+| [`github-trending`](github-trending/) | Weekly top 10 trending GitHub repos, ranked by stars gained — vision-based extraction, English-only filter, formatted email report |
 
 ### Automation & Publishing
 
@@ -64,6 +65,17 @@ All resume and career skills are organized under [`job-search/`](job-search/) fo
 |-------|-------------|
 | [`concert-monitor`](concert-monitor/) | Weekly concert digest for any metro area — configurable venues, multi-platform search, email/Telegram/Discord delivery |
 | [`weekly-blog`](weekly-blog/) | Automated research-to-blog pipeline — deep research → Obsidian → humanized blog post → publish via SSH/rsync |
+| [`tech-news-digest`](tech-news-digest/) | Twice-weekly tech news digest — 5 categories, 3-round web search, multi-source synthesis, HTML email via AgentMail |
+| [`new-music-digest`](new-music-digest/) | Weekly new releases for your Last.fm top artists — MusicBrainz dates + Deezer cover art/genres, HTML email with inline covers |
+| [`here-now`](here-now/) | Publish any file or folder to a live URL instantly. Static hosting, anonymous (24h) or authenticated (permanent), custom domains |
+
+### Recommended External Skills
+
+Skills not maintained here but worth installing alongside Hermes:
+
+| Skill | What it does | Source |
+|-------|-------------|--------|
+| `last30days` | Multi-source "what are people saying about X" research across Reddit, X, YouTube, HN, TikTok, Polymarket, GitHub, and the web | [mvanhorn/last30days-skill](https://github.com/mvanhorn/last30days-skill) |
 
 ## Quick Start
 
