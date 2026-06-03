@@ -69,6 +69,13 @@ All resume and career skills are organized under [`job-search/`](job-search/) fo
 | [`new-music-digest`](new-music-digest/) | Weekly new releases for your Last.fm top artists — MusicBrainz dates + Deezer cover art/genres, HTML email with inline covers |
 | [`here-now`](here-now/) | Publish any file or folder to a live URL instantly. Static hosting, anonymous (24h) or authenticated (permanent), custom domains |
 
+### Travel
+
+| Skill | What it does |
+|-------|-------------|
+| [`flight-tracker`](flight-tracker/) | Real-time flight tracking via AviationStack — status, gates, delays, baggage. Auto-discovers flights from forwarded booking emails; cron monitoring on travel days |
+| [`travelogue`](travelogue/) | Log trip experiences into a structured Obsidian journal — text and photos via Discord/Telegram, daily entries with emoji sections, end-of-trip recaps |
+
 ### Recommended External Skills
 
 Skills not maintained here but worth installing alongside Hermes:
