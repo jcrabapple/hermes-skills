@@ -58,6 +58,7 @@ All resume and career skills are organized under [`job-search/`](job-search/) fo
 |-------|-------------|
 | [`valyu`](valyu/) | Search web + 36+ proprietary data sources (arXiv, PubMed, SEC filings, clinical trials, patents, financial data) via Valyu API |
 | [`github-trending`](github-trending/) | Weekly top 10 trending GitHub repos, ranked by stars gained — vision-based extraction, English-only filter, formatted email report |
+| [`contribscout`](contribscout/) | Discover open-source contribution opportunities — GitHub search, enrichment, and LLM analysis to find repos where you can create visible value before they get crowded |
 
 ### Automation & Publishing
 
