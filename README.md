@@ -51,6 +51,7 @@ All resume and career skills are organized under [`job-search/`](job-search/) fo
 | [`nanogpt-tiktok`](nanogpt-tiktok/) | Scrape TikTok hashtags, profiles, keyword searches, and video URLs with ASR transcripts via NanoGPT API |
 | [`nanogpt-instagram`](nanogpt-instagram/) | Scrape Instagram posts (captions, metrics, media, comments) via NanoGPT API |
 | [`nanogpt-linkedin`](nanogpt-linkedin/) | Scrape LinkedIn profile data (name, title, company, email, education) via NanoGPT API |
+| [`hermes-tweet`](hermes-tweet/) | Use the native Hermes Tweet plugin for X/Twitter search, reads, monitors, follower exports, and approved X actions through Xquik |
 
 ### Research & Information
 
