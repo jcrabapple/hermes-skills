@@ -124,7 +124,7 @@ check "Phone number (full or partial-redaction form)" \
 
 # 14. Personal service inbox IDs (AgentMail and similar). The inbox part
 # before @ is a stable identifier that's effectively a username — if
-# `herman-the-hermes-agent@agentmail.to` appears in worked examples, every
+# `your-agent-name@agentmail.to` appears in worked examples, every
 # downstream user sees it.
 check "Personal service inbox ID" \
   grep -rInE '[a-z][a-z0-9._-]+@agentmail\.to' "$SKILL_DIR" "${INCLUDES[@]}" \
