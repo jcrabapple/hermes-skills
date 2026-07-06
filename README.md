@@ -77,6 +77,12 @@ All resume and career skills are organized under [`job-search/`](job-search/) fo
 | [`flight-tracker`](flight-tracker/) | Real-time flight tracking via AviationStack — status, gates, delays, baggage. Auto-discovers flights from forwarded booking emails; cron monitoring on travel days |
 | [`travelogue`](travelogue/) | Log trip experiences into a structured Obsidian journal — text and photos via Discord/Telegram, daily entries with emoji sections, end-of-trip recaps |
 
+### Hermes Ecosystem
+
+| Skill | What it does |
+|-------|-------------|
+| [`hermes-community-registry`](hermes-community-registry/) | Search, filter, evaluate, and install community skills/plugins/tools from the babylondreams.de registry — 490+ entries synced from Discord, bundled Python search script, evaluation checklist |
+
 ### Recommended External Skills
 
 Skills not maintained here but worth installing alongside Hermes:
