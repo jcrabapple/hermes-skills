@@ -48,15 +48,36 @@ All resume and career skills are organized under [`job-search/`](job-search/) fo
 
 | Skill | What it does |
 |-------|-------------|
+| [`mastodon`](mastodon/) | Post to Mastodon via API — text statuses, media attachments, polls, scheduled posts, visibility control, threads |
+| [`mastodon-admin`](mastodon-admin/) | Administer a Mastodon instance — view/manage reports, suspend/silence accounts, resolve reports, welcome new users |
+| [`social-media-post-drafting`](social-media-post-drafting/) | Draft short-form posts for Mastodon, X, LinkedIn, Bluesky, Threads — platform identification, char-limit verification, topic research |
+| [`tiktok-research`](tiktok-research/) | Research TikTok content — scrape URLs, extract transcripts, analyze trends, draft Mastodon share posts from findings |
 | [`nanogpt-tiktok`](nanogpt-tiktok/) | Scrape TikTok hashtags, profiles, keyword searches, and video URLs with ASR transcripts via NanoGPT API |
 | [`nanogpt-instagram`](nanogpt-instagram/) | Scrape Instagram posts (captions, metrics, media, comments) via NanoGPT API |
 | [`nanogpt-linkedin`](nanogpt-linkedin/) | Scrape LinkedIn profile data (name, title, company, email, education) via NanoGPT API |
+| [`article-writing`](article-writing/) | Write articles, guides, blog posts, tutorials, newsletters, and research reports in a distinctive voice from supplied examples |
 | [`hermes-tweet`](hermes-tweet/) | Use the native Hermes Tweet plugin for X/Twitter search, reads, monitors, follower exports, and approved X actions through Xquik |
 
 ### Research & Information
 
 | Skill | What it does |
 |-------|-------------|
+| [`deep-research`](deep-research/) | Systematic multi-source methodology for comprehensive reports and complex, multi-faceted investigations |
+| [`answer-engine`](answer-engine/) | Research-focused query handling with multi-source synthesis, citations, and Obsidian persistence — like a self-hosted Perplexity |
+| [`hackernews-scraper`](hackernews-scraper/) | Scrape top Hacker News stories, filter by topic or keyword, return structured JSON with titles, URLs, scores, comment counts |
+| [`stock-recommendations`](stock-recommendations/) | Weekly stock recommendation digest using mixed signals — technical, fundamental, and sentiment analysis |
+| [`domain-intel`](domain-intel/) | Passive domain reconnaissance — subdomain discovery, SSL certs, WHOIS, DNS records, domain availability. No API keys needed |
+| [`repo-discovery`](repo-discovery/) | Automated GitHub repository discovery and monitoring — scraping, scoring, and integration patterns |
+| [`product-feature-availability`](product-feature-availability/) | Investigate whether a documented product feature is actually available for a specific user context (region, plan, platform) |
+| [`consumer-durables-research`](consumer-durables-research/) | Systematic research for major purchases (appliances, HVAC, power tools) — reliability data, failure modes, head-to-head comparisons |
+| [`cross-border-shopping`](cross-border-shopping/) | Research and evaluate gray-market / cross-border products — carrier compatibility, ROM verification, retailer vetting, pricing benchmarks |
+| [`llm-performance-benchmark`](llm-performance-benchmark/) | Find LLM tokens-per-second, latency, and throughput metrics with fallback to published third-party benchmarks |
+| [`llm-prompt-analysis`](llm-prompt-analysis/) | Analyze external LLM system prompts (leaked, published, or competitor-released) to extract transferable patterns |
+| [`kagi-tools-guide`](kagi-tools-guide/) | Guide for using the kagi-tools Hermes plugin — which tool for what, auth requirements, fallback patterns, known quirks |
+| [`feynman-research-agent`](feynman-research-agent/) | Install and operate the external Feynman CLI for paper reading, literature reviews, audits, and replication |
+| [`ai-context-generation`](ai-context-generation/) | Generate compact AI-readable context maps from codebases for feeding to LLMs |
+| [`wiki-ingestion`](wiki-ingestion/) | Ingest research outputs into an interlinked markdown knowledge base for LLM querying |
+| [`parallel-cli`](parallel-cli/) | Agent-native web research using Parallel CLI — multi-page extraction, structured data, screenshots |
 | [`valyu`](valyu/) | Search web + 36+ proprietary data sources (arXiv, PubMed, SEC filings, clinical trials, patents, financial data) via Valyu API |
 | [`github-trending`](github-trending/) | Weekly top 10 trending GitHub repos, ranked by stars gained — vision-based extraction, English-only filter, formatted email report |
 | [`contribscout`](contribscout/) | Discover open-source contribution opportunities — GitHub search, enrichment, and LLM analysis to find repos where you can create visible value before they get crowded |
@@ -65,11 +86,18 @@ All resume and career skills are organized under [`job-search/`](job-search/) fo
 
 | Skill | What it does |
 |-------|-------------|
-| [`concert-monitor`](concert-monitor/) | Weekly concert digest for any metro area — configurable venues, multi-platform search, email/Telegram/Discord delivery |
 | [`weekly-blog`](weekly-blog/) | Automated research-to-blog pipeline — deep research → Obsidian → humanized blog post → publish via SSH/rsync |
 | [`tech-news-digest`](tech-news-digest/) | Twice-weekly tech news digest — 5 categories, 3-round web search, multi-source synthesis, HTML email via AgentMail |
+| [`fastmail-imap-newsletter-digest`](fastmail-imap-newsletter-digest/) | Read emails from Fastmail via IMAP, extract newsletter content, summarize via NanoGPT, deliver digest via AgentMail |
+| [`concert-monitor`](concert-monitor/) | Weekly concert digest for any metro area — configurable venues, multi-platform search, email/Telegram/Discord delivery |
 | [`new-music-digest`](new-music-digest/) | Weekly new releases for your Last.fm top artists — MusicBrainz dates + Deezer cover art/genres, HTML email with inline covers |
 | [`here-now`](here-now/) | Publish any file or folder to a live URL instantly. Static hosting, anonymous (24h) or authenticated (permanent), custom domains |
+
+### Learning & Education
+
+| Skill | What it does |
+|-------|-------------|
+| [`teaching-workspace`](teaching-workspace/) | Stateful teaching system with a structured workspace — MISSION.md, lessons, reference docs, and learning records. Fluency vs storage strength, zone of proximal development, cross-session continuity |
 
 ### Travel
 
@@ -77,6 +105,26 @@ All resume and career skills are organized under [`job-search/`](job-search/) fo
 |-------|-------------|
 | [`flight-tracker`](flight-tracker/) | Real-time flight tracking via AviationStack — status, gates, delays, baggage. Auto-discovers flights from forwarded booking emails; cron monitoring on travel days |
 | [`travelogue`](travelogue/) | Log trip experiences into a structured Obsidian journal — text and photos via Discord/Telegram, daily entries with emoji sections, end-of-trip recaps |
+
+### Software Development & Agent Workflows
+
+| Skill | What it does |
+|-------|-------------|
+| [`session-handoff`](session-handoff/) | Compact a session into a structured handoff document for delegate_task subagents or cross-session continuity. State not instructions, capture the "why", reference don't duplicate |
+| [`subagent-driven-development`](subagent-driven-development/) | Execute implementation plans via delegate_task subagents with 2-stage review (spec then quality). Includes the 5-part contract for autonomous loops with reward-hacking prohibition |
+| [`hermes-agent-skill-authoring`](hermes-agent-skill-authoring/) | Author in-repo SKILL.md files — frontmatter validation, directory placement, design philosophy, anti-patterns, ship checklist, cross-ecosystem import, and pre-publish audit scripts |
+
+### Research
+
+| Skill | What it does |
+|-------|-------------|
+| [`deep-research`](deep-research/) | Systematic 4-phase research methodology (broad exploration → deep dive → diversity validation → synthesis). Includes research-prompt construction, delegation patterns, MoA parallel decomposition, and wiki ingestion |
+
+### Hermes Ecosystem
+
+| Skill | What it does |
+|-------|-------------|
+| [`hermes-community-registry`](hermes-community-registry/) | Search, filter, evaluate, and install community skills/plugins/tools from the babylondreams.de registry — 490+ entries synced from Discord, bundled Python search script, evaluation checklist |
 
 ### Recommended External Skills
 

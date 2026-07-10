@@ -650,7 +650,7 @@ write_file(path="~/Documents/Resumes/tailored_company.md", content=content)
 ```bash
 cd /tmp && uv venv .venv && source .venv/bin/activate && uv pip install python-docx lxml
 cp ~/.hermes/skills/tailored-resume-generator/scripts/md_to_docx.py /tmp/
-python3 /tmp/md_to_docx.py input.md /var/home/jason/Documents/Resumes/tailored_company.docx
+python3 /tmp/md_to_docx.py input.md ~/Documents/Resumes/tailored_company.docx
 ```
 
 **Only if the canonical script fails:** Create a temp venv and write a custom conversion script. The Hermes system Python is managed by `uv` and rejects `pip install --system`.
@@ -762,7 +762,7 @@ for section in doc.sections:
     section.left_margin = Inches(0.7)
     section.right_margin = Inches(0.7)
 
-output_path = '/var/home/jason/Documents/Resumes/Jason_Crabtree_resume_Company_Role.docx'
+output_path = os.path.expanduser('~/Documents/Resumes/Jason_Crabtree_resume_Company_Role.docx')
 doc.save(output_path)
 print(f"Saved to {output_path}")
 ```
@@ -775,7 +775,7 @@ Use the verification script from the skill:
 
 ```bash
 source /tmp/.venv/bin/activate
-python3 scripts/verify_docx.py /home/jason/Documents/Resumes/tailored_company.docx
+python3 scripts/verify_docx.py ~/Documents/Resumes/tailored_company.docx
 ```
 
 If artifacts are found, the script lists every paragraph containing them so you can debug the conversion. Common causes:
@@ -790,7 +790,7 @@ If using the skill's `scripts/md_to_docx.py` (the canonical converter), this sho
 source /tmp/.venv/bin/activate
 python3 -c "
 import docx
-doc = docx.Document('/home/jason/Documents/Resumes/tailored_company.docx')
+doc = docx.Document(os.path.expanduser('~/Documents/Resumes/tailored_company.docx'))
 issues = [p.text for p in doc.paragraphs if '**' in p.text]
 if issues:
     print(f'⚠️   Found {len(issues)} paragraphs with markdown artifacts:')
@@ -807,7 +807,7 @@ The Hermes system venv doesn't have python-docx. Use the same temp venv approach
 cd /tmp && uv venv .venv && source .venv/bin/activate && uv pip install python-docx
 python3 -c "
 import docx
-doc = docx.Document('/var/home/jason/Documents/Resumes/resume.docx')
+doc = docx.Document(os.path.expanduser('~/Documents/Resumes/resume.docx'))
 for p in doc.paragraphs:
     print(p.text)
 "
