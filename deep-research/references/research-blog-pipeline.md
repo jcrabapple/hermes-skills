@@ -1,4 +1,4 @@
-# Research → Obsidian → Blog Pipeline
+# Research → Obsidian → Blog → Mastodon Pipeline
 
 Full end-to-end workflow for researching any topic and publishing the results. For TikTok fact-checking specifically, see [tiktok-blog-pipeline.md](tiktok-blog-pipeline.md) which adds a scraping step.
 
@@ -41,53 +41,67 @@ Include:
 
 ## Step 3: Write Blog Post
 
-Read 1-2 recent posts to match the user's established voice. Then write the post using your blog platform's conventions.
+Read 1-2 recent posts from `~/blog/` to match Jason's established voice. Then write the post to `~/blog/slug.md`.
 
-### Blog Post Conventions (generic)
+### Blog Post Conventions (prose.sh)
 
-- H1 title (punchy, specific, becomes page title)
+- H1 title (punchy, specific, becomes page title) — no YAML frontmatter
 - Italic date/tag line: `*Month DD, YYYY · Tags: tag1, tag2, tag3*`
 - Conversational-but-substantive tone — real data, specific numbers, named sources
 - Each section starts with something concrete (fact, data point, scene)
 - Sections build a narrative or argument, each adding something new
 - Real-citation Sources block at the end with numbered list and URLs
+- Single em-dashes for dramatic pause are fine; avoid bracketed asides with em-dashes
 
 ### Slug Style
 
-Hyphenated descriptive phrase. Examples:
+Hyphenated descriptive phrase. Examples from the archive:
 - `finland-sand-battery-survived-winter`
 - `crow-funerals-are-not-what-you-think`
+- `lake-baikal-is-dying-the-way-ancient-things-die`
 
 ### Publish
 
-Use your blog platform's publish method (rsync to a blog host, CLI tool, API, etc.). Verify publication by fetching the live URL and checking for expected content.
+```bash
+SLUG="your-slug"
+cp ~/blog/${SLUG}.md /tmp/${SLUG}.md
+rsync -vr --force --no-compress /tmp/${SLUG}.md prose.sh:/${SLUG}.md
+sleep 2 && curl -sf "https://hermez.prose.sh/${SLUG}" | grep -o '<h1[^>]*>[^<]*</h1>' | head -1 && echo "LIVE"
+```
 
 ### Verification
 
-**Primary**: Fetch the live page URL and check for expected content (title, headings). Do not rely on file stat commands — verify the rendered page is actually live.
+**Primary**: `curl -sf "https://hermez.prose.sh/${SLUG}"` — fetch the live page and check for expected content.
 
-## Step 4: Share to Social Media
+**Note**: `ssh prose.sh stat -c '%s' /slug.md` may fail with "invalid file, format must be (.md,...)" even when the file exists and the page is live. This appears to be a prose.sh restricted-shell issue. Do not rely on `stat` as the sole verification — always use `curl`.
 
-Compose a short, punchy social media post:
+## Step 4: Post to Mastodon
+
+Compose a short, punchy Mastodon post:
 - Start with relevant emoji
 - Punchy hook first line
 - Key finding or dramatic fact in 2-3 lines
 - Blog post link
 - 2-3 relevant hashtags
 - No emdashes, no markdown, no source URLs in body
-- Respect character limits for the target platform
+- Must be ≤ 1989 chars (URLs count as 23 each)
 
-Always dry-run social media posts before publishing for real. Use a helper script if available, or the platform's API directly.
+**Always use the helper script** — never try multiline curl with emoji:
+```bash
+python3 ~/.hermes/skills/social-media/mastodon/scripts/mastodon_post.py --status "Post text here" --dry-run  # preview first
+python3 ~/.hermes/skills/social-media/mastodon/scripts/mastodon_post.py --status "Post text here"
+```
 
 ## Pipeline Summary
 
 1. Research (4-phase, batched parallel searches, `web_extract` for summaries)
 2. Save to Obsidian (`$VAULT/Research/YYYY-MM-DD-slug.md`)
-3. Read 1-2 recent blog posts for voice → write blog → publish → verify
-4. Compose social media post → dry-run → post → capture URL
+3. Read 1-2 recent blog posts for voice → write blog → rsync to prose.sh → verify with curl
+4. Compose Mastodon post → dry-run → post → capture URL
 
 ## Pitfalls
 
-- **Don't skip reading existing blog posts for voice.** Match the user's established style: concrete opening hook, sections with real data, Sources block.
+- **Don't skip reading existing blog posts for voice.** Jason's blog has a distinctive style: concrete opening hook, sections with real data, Sources block. Match it.
 - **Don't use `nanogpt_web_extract` for Wikipedia.** It returns 100KB+ of raw wikitext. Use `web_extract` which returns a clean ~5000-char structured summary.
-- **Always dry-run social media posts first.** Check character count and formatting before posting for real.
+- **Don't rely on `ssh prose.sh stat` for verification.** Use `curl -sf https://hermez.prose.sh/slug` instead.
+- **Always `--dry-run` Mastodon posts first.** Check character count and formatting before posting for real.

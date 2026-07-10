@@ -1,4 +1,4 @@
-# TikTok → Research → Blog Pipeline
+# TikTok → Research → Blog → Mastodon Pipeline
 
 Full end-to-end workflow for fact-checking TikTok videos and publishing the results.
 
@@ -7,7 +7,6 @@ Full end-to-end workflow for fact-checking TikTok videos and publishing the resu
 **Always use the CLI scraper, NOT the browser.** TikTok pages mix the target video with recommended/fed content — the browser shows both and it's easy to grab the wrong description.
 
 ```bash
-# Use the nanogpt-tiktok skill's CLI scraper if available
 cd ~/.hermes/skills/social-media/nanogpt-tiktok/scripts
 python3 scrape_tiktok.py --urls "https://www.tiktok.com/t/Zxxx/" --results 1
 ```
@@ -56,34 +55,45 @@ Use the Obsidian skill conventions. Include:
 
 ## Step 3: Write Blog Post
 
-Read 1-2 recent posts to match tone and structure. Then write the post using your blog platform's conventions.
+Read 1-2 recent posts from `~/blog/` to match tone and structure. Then write the post to `~/blog/slug.md`.
 
-**Blog post conventions (generic):**
+**Blog post conventions (prose.sh):**
 - H1 title (becomes page title)
 - Italic date/tag line: `*Month DD, YYYY · Tags: tag1, tag2, tag3*`
 - Conversational but substantive tone
 - Real citations with sources at the end (Sources block)
+- No YAML frontmatter
 - For fact-checks: structure around specific claims with verdicts
 
 **Publish:**
-Use your blog platform's publish method (rsync to a blog host, CLI tool, API, etc.). Verify publication by fetching the live URL.
+```bash
+cp ~/blog/slug.md /tmp/slug.md
+rsync -vr --force --no-compress /tmp/slug.md prose.sh:/slug.md
+sleep 2 && curl -sf https://hermez.prose.sh/slug > /dev/null && echo "LIVE"
+```
 
-## Step 4: Share to Social Media
+## Step 4: Post to Mastodon
 
-Compose a short, punchy social media post:
+Compose a short, punchy Mastodon post:
 - Start with relevant emoji
 - Punchy hook first line
 - Key finding or verdict in 2-3 lines
 - Blog post link
 - 2-3 relevant hashtags
 - No emdashes, no markdown, no source URLs in body
-- Respect character limits for the target platform
+- Must be ≤ 1989 chars (URLs count as 23 each)
 
-Use a helper script or the platform's API for anything beyond a simple single-line post.
+**Use the helper script or write a Python script** — do NOT try multiline curl with emoji:
+```bash
+python3 scripts/mastodon_post.py --status "Post text here"
+```
+
+Or write a script to `/tmp/mastodon_post.py` for complex posts with multiline text and emoji.
 
 ## Pitfalls
 
 - **Never use browser_navigate for TikTok.** The page mixes target video with recommended content. Use the CLI scraper.
 - **The `nanogpt_tiktok_scraper` built-in tool returns 400s on short URLs.** Always use `scripts/scrape_tiktok.py` CLI.
+- **Shell escaping breaks Mastodon posts.** Use the helper script for anything beyond a simple single-line post.
 - **Fact-check structure matters.** Don't just research the topic — research the specific claims. The blog post should have clear verdicts.
 - **Read existing blog posts first.** Match the established voice: italic date/tag line, conversational-but-substantive, real-citation Sources block at the end.

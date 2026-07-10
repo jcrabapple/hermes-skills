@@ -1,17 +1,18 @@
 ---
 name: deep-research
 description: >-
-  Deep multi-source research methodology for complex or multi-faceted
-  questions. Provides systematic 4-phase research: broad exploration,
-  deep dive, diversity validation, and synthesis. Use when the user
-  asks for a research report, deep dive, comprehensive analysis, or
-  investigation. Triggers on: deep dive, research, investigate,
-  comprehensive, thorough analysis, research report. Do NOT use for
-  simple factual lookups — use kagi fastgpt or nanogpt_web_search instead.
+  Systematic multi-source methodology for comprehensive reports and complex,
+  multi-faceted investigations. Use when the user asks for a deep dive,
+  comprehensive analysis, literature-style synthesis, or formal research
+  report. Not for quick factual answers (use answer-engine), recent social
+  sentiment (use last30days), proprietary academic/financial datasets (use
+  valyu), or explicit multi-model deliberation (use openrouter-fusion-research).
 origin: bytedance/deer-flow
 ---
 
 # Deep Research Skill
+
+For routing among the research ecosystem, load `references/research-skill-routing.md`.
 
 ## Core Principle
 
@@ -263,6 +264,10 @@ See [references/delegation-failures.md](references/delegation-failures.md) for s
 
 For tasks with 3+ independent research dimensions (e.g. "analyze this project's codebase + bugs + upstream compatibility"), dispatch multiple `delegate_task` subagents in parallel — one per dimension — and synthesize their results. This is faster than sequential single-agent research and produces deeper coverage. Results stream back as async batches. See [references/moa-parallel-decomposition.md](references/moa-parallel-decomposition.md) for the full pattern, template prompts, and synthesis document structure.
 
+## Routing Guide
+
+When multiple research skills could match a user's request, see [references/research-skill-routing.md](references/research-skill-routing.md) for the disambiguation framework covering all 5 research modes (quick lookup, deep research, social-last-30-days, paper research, multi-model deliberation).
+
 ## Wiki Ingestion Step
 
 If a Karpathy-style LLM wiki exists (at `~/wiki/` or `$WIKI_PATH`), ingest key findings after synthesis:
@@ -288,10 +293,11 @@ The `scripts/with_wiki_ingestion.py` script provides automated wrappers for this
 ## Pitfalls
 
 - **web_extract may be blocked in cron sessions.** Cloudflare WAF, rate limits, or billing errors can block web extraction when running from cron. When this happens, proceed with the model's existing knowledge rather than aborting. A degraded research report is better than no output. The weekly-blog skill documents this pattern ("proceed with model knowledge") but any skill loading deep-research in cron should be aware.
+- **Banking/financial API research**: When researching US banking APIs, always separate read access (transactions/balances via Plaid — widely available) from write access (money movement — almost never available for personal accounts). The US has no PSD2 equivalent. Plaid Transfer explicitly prohibits same-person transfers. Mercury Personal is the only US personal account with a full API including internal transfers. See [references/us-banking-apis.md](references/us-banking-apis.md).
 - **hermes_tools is not available in cron Python sandbox.** `from hermes_tools import web_search` (or any hermes_tools import) will fail with `ModuleNotFoundError` in cron sessions. Use terminal `curl` commands or agent-level `web_search`/`nanogpt_web_search` tool calls instead of trying to import them in `execute_code`.
 - **Wiki path:** The wiki lives at `~/wiki/` (not `/home/wiki/` or `$HOME/wiki/` without expanding). Always use the full absolute path with `~` or `$HOME` expanded. Write operations that use bare `/home/wiki/` will fail silently.
 - **Entity + Concept pair:** When research covers both a specific organism/entity AND a broader technique or concept (e.g., colossal squid + eDNA), create BOTH an entity page and a concept page. Don't force everything into one page type.
-- **TikTok → Research → Blog pipeline:** When fact-checking a TikTok video, structure the research around the specific claims made in the video. Each claim gets a verdict (true/mostly true/false/nuanced) with evidence. This makes the blog post much more useful than a generic topic overview. See [references/tiktok-blog-pipeline.md](references/tiktok-blog-pipeline.md) for the full end-to-end workflow (scrape → research → publish).
+- **TikTok → Research → Blog pipeline:** When fact-checking a TikTok video, structure the research around the specific claims made in the video. Each claim gets a verdict (true/mostly true/false/nuanced) with evidence. This makes the blog post and Obsidian note much more useful than a generic topic overview. See [references/tiktok-blog-pipeline.md](references/tiktok-blog-pipeline.md) for the full end-to-end workflow (scrape → research → Obsidian → blog → Mastodon).
 - **TikTok/social media extraction via browser:** When `nanogpt_tiktok_scraper` or `video_analyze` fails on TikTok URLs (common — TikTok blocks direct video extraction), use `browser_navigate` to load the page, then `browser_snapshot` to extract the key metadata: creator handle, caption text, hashtags, engagement metrics (likes/comments/favorites/shares), and the music/sound name. This gives enough context to research the topic even when the video itself can't be downloaded. The alt text on the video thumbnail often contains the full caption — look for `img "..."` elements with descriptive text.
 
 ## Next Step: Content Generation
@@ -300,16 +306,17 @@ After research is complete, the output depends on what the user asked for:
 
 - **Research report only** — load the **article-writing** skill for structured report/article output
 - **Save to Obsidian** — save full research findings (with sources, data tables, timelines) to `$VAULT/Research/YYYY-MM-DD-slug.md` using the Obsidian skill conventions
-- **Blog post** — write to `~/blog/slug.md` using your blog platform's post template (H1 title, italic date/tag line, conversational-but-substantive voice, Sources block at end), then publish via your platform's CLI or API
-- **Social media** — compose a short punchy post (no emdashes, no markdown, relevant hashtags + blog link) for your preferred platform
+- **Blog post** — write to `~/blog/slug.md` using the pico-sh blog post template (H1 title, italic date/tag line, conversational-but-substantive voice, Sources block at end), then rsync to prose.sh
+- **Mastodon** — compose a short punchy post (no emdashes, no markdown, ≤1989 chars, relevant hashtags + blog link), use `mastodon_post.py` helper script
 
-### Full Research → Obsidian → Blog Pipeline
+### Full Research → Obsidian → Blog → Mastodon Pipeline
 
-When the user asks for the full pipeline ("research X, save to Obsidian, write a blog post"), follow the workflow documented in [references/research-blog-pipeline.md](references/research-blog-pipeline.md).
+When the user asks for the full pipeline ("research X, save to Obsidian, write a blog post, share to Mastodon"), follow the workflow documented in [references/research-blog-pipeline.md](references/research-blog-pipeline.md).
 
 Key conventions:
-- Save research to Obsidian before writing the blog (the research note is the detailed source; the blog is the readable distillation)
-- Read 1-2 recent blog posts to match the user's established voice before writing
+- Save research to Obsidian **before** writing the blog (the research note is the detailed source; the blog is the readable distillation)
+- Read 1-2 recent blog posts from `~/blog/` to match Jason's established voice before writing
 - Batch independent searches in Phase 1 (3 queries in parallel) to speed up broad exploration
 - Use `web_extract` for Wikipedia and large pages (returns ~5000-char structured summaries). Reserve `nanogpt_web_extract` for non-Wikipedia sources needing raw full content.
-- Always dry-run social media posts before publishing for real
+- Verify prose.sh publication with `curl -sf https://hermez.prose.sh/slug`, not `ssh prose.sh stat` (the latter fails on valid files)
+- Always `--dry-run` Mastodon posts before publishing for real
