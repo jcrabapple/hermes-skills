@@ -90,6 +90,7 @@ All resume and career skills are organized under [`job-search/`](job-search/) fo
 | [`fastmail-imap-newsletter-digest`](fastmail-imap-newsletter-digest/) | Read emails from Fastmail via IMAP, extract newsletter content, summarize via NanoGPT, deliver digest via AgentMail |
 | [`concert-monitor`](concert-monitor/) | Weekly concert digest for any metro area — configurable venues, multi-platform search, email/Telegram/Discord delivery |
 | [`new-music-digest`](new-music-digest/) | Weekly new releases for your Last.fm top artists — MusicBrainz dates + Deezer cover art/genres, HTML email with inline covers |
+| [`deezer-playlist-creator`](deezer-playlist-creator/) | Create Deezer playlists from any query — similar artists, genre mixes, festival lineups. Three-tier pipeline: public API discovery → GQL search → playlist creation via ARL auth |
 | [`here-now`](here-now/) | Publish any file or folder to a live URL instantly. Static hosting, anonymous (24h) or authenticated (permanent), custom domains |
 
 ### Learning & Education
