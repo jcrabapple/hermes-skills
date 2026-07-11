@@ -2,14 +2,15 @@
 name: deezer-playlist-creator
 description: >-
   Create Deezer playlists programmatically from any query — similar artists,
-  genre mixes, festival lineups, mood-based collections. Three-tier data
-  pipeline: Deezer public REST API for discovery, GQL Pipe API for smart
-  mixes and playlist creation, web search for subjective curation.
-  Uses ARL cookie auth — no OAuth app required.
-triggers:
-  - make me a deezer playlist
-  - create a deezer playlist
-  - deezer playlist from
+  genre mixes, festival lineups, mood-based collections. Four-tier data
+  pipeline: Deezer public REST API + Last.fm scrobble data for discovery,
+  GQL Pipe API for smart mixes and playlist creation, web search for
+  subjective curation. Uses ARL cookie auth — no OAuth app required.
+related_skills:
+  - deezer
+  - infisical-secrets
+  - soundiiz
+  - new-music-digest
   - build playlist on deezer
   - generate deezer playlist
   - artists similar to
@@ -72,6 +73,36 @@ Load the `deezer` skill before using these endpoints — it has the full referen
 ```
 
 Every step uses the public REST API for discovery. The GQL API only enters at the final step to create the playlist.
+
+### Tier 1.5: Last.fm API (API key)
+
+Supplementary source for artist similarity and scrobble-ranked tracks. Last.fm's data is crowd-sourced from real listening behavior across millions of users — often better quality than algorithmic recommendations.
+
+Load the `new-music-digest` skill for the full Last.fm endpoint reference and API key.
+
+| Query type | API call | Returns | Why use over Deezer |
+|---|---|---|---|
+| "Artists similar to X" | `artist.getsimilar&artist=NAME&limit=10` | Scrobble-based similar artists | Real fan overlap, not algorithmic |
+| "Top tracks by X (by plays)" | `artist.gettoptracks&artist=NAME&limit=10` | Tracks ranked by scrobble count | Fan play counts, not stream counts |
+| "My most-played artists" | `user.gettopartists&user=USERNAME&period=3month` | Personal top artists by scrobble | Personalizes playlists from your history |
+
+**When to use Last.fm:**
+- Established artists (pre-2020) — Last.fm has deeper listening history
+- Niche/subgenre artists — fan communities create better similarity signals
+- "Make me a playlist from my library" — `user.gettopartists` seeds from your actual listening
+- Cross-referencing Deezer's `related` results — pick artists that appear in both
+
+**When to skip Last.fm:**
+- Brand new artists (minimal scrobble history)
+- The Deezer public API returns good results quickly — try it first, supplement with Last.fm if the results seem off
+
+**Integration pattern:**
+```
+1. Deezer: GET /search/artist?q=X → Deezer artist ID
+2. Last.fm: GET artist.getsimilar&artist=X → similar artists
+3. For each similar artist: Deezer GET /search/artist?q=Y → Deezer artist ID → GET /artist/{id}/top
+4. Build JSON and pipe
+```
 
 ### Tier 2: Deezer GQL Pipe API (ARL auth)
 
@@ -196,13 +227,25 @@ python3.14 scripts/deezer_create_playlist.py --input /tmp/playlist.json
 3. Build JSON and pipe
 ```
 
+### "Make me a playlist from my Last.fm library"
+
+```
+1. Load new-music-digest skill (for Last.fm key and endpoint reference)
+2. GET Last.fm: user.gettopartists&user=USERNAME&period=3month&limit=20
+3. For each artist: Deezer GET /search/artist?q=NAME → artist ID → GET /artist/{id}/top?limit=3
+4. (Optional) GET Last.fm: artist.gettoptracks for scrobble-ranked picks instead
+5. Build JSON and pipe
+```
+
 ## Decision Tree
 
 When the user asks for a playlist, follow this order:
 
-1. **Can the public REST API answer this directly?** (similar artists, top tracks, genre, charts, search) → Use Tier 1
-2. **Does it need algorithmic smarts?** (track-based mixes, personal recommendations, flow) → Use Tier 2
-3. **Is it subjective or requires human cultural knowledge?** (vibes, deep cuts, "best of" lists, festival lineups) → Use Tier 3 (web search)
+1. **Is this a personal "from my library" request?** → Use Last.fm `user.gettopartists` to seed, then Deezer to resolve tracks
+2. **Can the public REST API answer this directly?** (similar artists, top tracks, genre, charts, search) → Use Tier 1
+3. **Would scrobble data improve similarity?** (established artists, niche genres, pre-2020 acts) → Supplement Tier 1 with Last.fm `artist.getsimilar`
+4. **Does it need algorithmic smarts?** (track-based mixes, personal recommendations, flow) → Use Tier 2
+5. **Is it subjective or requires human cultural knowledge?** (vibes, deep cuts, "best of" lists, festival lineups) → Use Tier 3 (web search)
 
 Never use web search when the public API has a direct endpoint for the query. Never use the GQL API for simple searches the public API handles faster.
 
