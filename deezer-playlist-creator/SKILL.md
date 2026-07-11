@@ -22,12 +22,13 @@ related_skills:
 metadata:
   hermes:
     tags: [deezer, playlist, music, creation, curation]
+    setup_complete: true
 prerequisites:
   commands: [python3.14, pip]
   python_packages: [deezer-python-gql]
   secrets:
     - name: DEEZER_ARL
-      stored_in: Environment variable, Infisical, or secrets file
+      stored_in: Infisical (project af3b8a09, env dev)
       description: Your Deezer ARL cookie (192-char hex string from browser DevTools)
       how_to_get: |
         1. Go to deezer.com and log in
@@ -76,15 +77,15 @@ Every step uses the public REST API for discovery. The GQL API only enters at th
 
 Adds algorithmic personalization. Use these when the public API can't answer the question.
 
-| Method | What it gives | Use when |
-|---|---|---|
-| `get_artist_mix(artist_id)` | Algorithmic mix based on artist | "Deep cuts similar to X" |
-| `get_track_mix(track_id)` | Mix from a seed track | "Songs like this one" |
-| `get_similar_tracks(track_id)` | Similar to one track | "More tracks in this vein" |
-| `get_recommendations()` | Personalized "you might like" | "Surprise me" |
-| `get_flow()` | Deezer's infinite Flow radio | "Put on something I'll like" |
-| `get_charts()` | Current chart data | "What's hot right now" |
-| `search(query)` | Authenticated search | Better results than public API |
+| Method | What it gives | Use when | Response shape |
+|---|---|---|---|
+| `get_artist_mix(artist_id)` | Algorithmic mix based on artist | "Deep cuts similar to X" | `tracks.edges[].node` |
+| `get_track_mix(track_ids, limit, start_with_input_track)` | Mix from seed track(s) | "Songs like this one" | `tracks[].track` ⚠️ flat list, not edges |
+| `get_similar_tracks(track_id)` | Similar to one track | "More tracks in this vein" | `tracks.edges[].node` |
+| `get_recommendations()` | Personalized "you might like" | "Surprise me" | varies |
+| `get_flow()` | Deezer's infinite Flow radio | "Put on something I'll like" | `tracks.edges[].node` |
+| `get_charts()` | Current chart data | "What's hot right now" | varies |
+| `search(query)` | Authenticated search | Better results than public API | `results.tracks.edges[].node` |
 
 **Common genre IDs for public API:** `0`=All, `132`=Pop, `116`=Rap/Hip Hop, `152`=Rock, `113`=Dance, `129`=Jazz, `98`=Classical, `85`=Alternative, `106`=Electro
 
@@ -108,12 +109,9 @@ The final step in every pipeline. Takes a JSON tracklist, searches Deezer for ea
 ### Usage
 
 ```bash
-# With env var (simplest)
-DEEZER_ARL="your-arl-cookie" python3.14 scripts/deezer_create_playlist.py < playlist.json
-
-# With Infisical (if you use it)
+# With Infisical injection (preferred)
 echo '{"title":"Name","description":"","tracks":[...]}' | \
-  infisical run --projectId <YOUR_PROJECT_ID> --env dev -- \
+  infisical run --projectId af3b8a09-35ab-4acc-b0ea-c4ef2201eb29 --env dev -- \
   python3.14 scripts/deezer_create_playlist.py
 
 # From a file
@@ -166,7 +164,7 @@ python3.14 scripts/deezer_create_playlist.py --input /tmp/playlist.json
 ```
 1. Load deezer skill
 2. GET /search/artist?q=Nirvana → artist ID 543
-3. GET /artist/543/related → [Pearl Jam, Soundgarden, Alice in Chains, ...]
+3. GET /artist/543/related → [Pearl Jam, Soundgarden, Alice in Chains, Stone Temple Pilots, ...]
 4. For each related artist: GET /artist/{id}/top?limit=3
 5. Build JSON: {title: "Artists Like Nirvana", tracks: [...]}
 6. Pipe to deezer_create_playlist.py
@@ -210,16 +208,18 @@ Never use web search when the public API has a direct endpoint for the query. Ne
 
 ## Pitfalls
 
-- **ARL expires ~3 months**. If auth fails, re-extract from browser and update your DEEZER_ARL.
+- **ARL expires ~3 months**. If auth fails, re-extract from browser and update Infisical
 - **Null nodes in search edges** — Some GQL track search results contain `edge.node = None`. The script skips these silently, but if all edges for a query are null the track is reported as missed. This is a Deezer API quirk, not a script bug.
-- **0.5 scoring threshold is generous** — It catches nearly everything (103/103 in testing) but produces false matches on ambiguous track names. Raise the threshold near line 117 in `deezer_create_playlist.py` if you prefer fewer false matches at the cost of more misses.
+- **0.5 scoring threshold is generous** — It catches nearly everything (103/103 in testing) but produces false matches on ambiguous track names. Example failures: Amira Elfeky's "Paradise" → I Prevail (0.79), Novelists' "WHERE TO FIND ME" → Bilmuri (0.77). These all scored well above 0.5 but got the wrong artist. Raise the threshold near line 117 in `deezer_create_playlist.py` if you prefer fewer false matches at the cost of more misses.
+- **`get_track_mix` has a different response shape than `search`** — Returns `mix.tracks[i].track` (flat list of `{track: ...}` objects), not `mix.tracks.edges[i].node`. Iterate with `for item in mix.tracks: node = item.track`. Also takes 3 required args: `track_ids` (list), `limit` (int), and `start_with_input_track` (bool).
+- **`search` returns `results.tracks.edges[].node`** — Not `tracks.edges` directly. Access via `results.results.tracks.edges`.
 - **Search errors in stderr** — The GQL API logs non-critical errors (album not found, playlist owner access denied) but search still returns results. Ignore the noise; check for actual data, not error messages.
 - **`contributors` not `artists`** — Track nodes use `contributors.edges[].node.name`, not a flat `artists` array
 - **`create_playlist` returns `{playlist: {id}}`** — Need `result.playlist.id`, not `result.id`
 - **Requires python3.14** — The script uses asyncio features from Python 3.14
 - **Rate limiting** — 0.2s delay between searches. Large playlists (50+ tracks) take a few minutes.
 - **Public API limit is 50 req/5s** — Add delays in bulk artist/track fetching loops
-- **Some tracks won't match** — ~5-10% miss rate is normal. Less common tracks, regional releases, or tracks with special characters in the title are the usual culprits.
+- **Some tracks won't match** — ~5-10% miss rate is normal. Less common tracks, regional releases, or tracks with special characters in the title are the usual culprits. The script reports misses so the user can manually add them.
 - **Genre IDs are Deezer-specific** — Use the list above; don't guess
 - **`/radio/top` is unreliable** — Use `/radio/genres` + `/radio/lists` instead
 
@@ -227,10 +227,10 @@ Never use web search when the public API has a direct endpoint for the query. Ne
 
 | Issue | Fix |
 |---|---|
-| `DEEZER_ARL not found` | Export the env var or use your secrets manager |
+| `DEEZER_ARL not found` | Run with `infisical run --` or export the var |
 | All tracks return "No match found" | ARL may be expired; re-extract from browser |
 | `Object of type ... is not JSON serializable` | Check `.playlist.id` extraction and track ID types |
 | GQL search returns 0 results | Fall back to public REST API search (`deezer` skill) |
 | Public API returns 0 for related artists | Some artists have empty related lists; try web search |
 | Playlist created but empty | `add_tracks_to_playlist` may have failed silently; check stderr |
-| Tracks matching wrong artists | Raise score threshold in the script; 0.5 is tuned for recall, 0.8+ for precision |
+| Tracks matching wrong artists (high recall, low precision) | Raise the score threshold near line 117 in the script; 0.5 is tuned for recall, 0.8+ for precision |
