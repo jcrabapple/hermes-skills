@@ -3,14 +3,19 @@ name: yolo-dev
 description: Run AI coding agents on disposable repo clones. The agent works on a clone — it can't touch your real repo. An optional container (Podman or Docker) provides build/test isolation. You review the diff and decide what (if anything) to apply.
 category: software-development
 version: 1.0.0
-tags: [sandbox, podman, docker, coding-agent, safety, diff-review]
+author: Jason Crabtree
+license: MIT
+metadata:
+  hermes:
+    tags: [sandbox, podman, docker, coding-agent, safety, diff-review]
+    related_skills: [podman-helper, subagent-driven-development]
 dependencies:
   - podman-helper
 ---
 
 # yolo-dev: Disposable Sandbox Coding
 
-Run AI coding agents on disposable repo clones. The agent works on a clone — it can't touch your real repo. An optional Podman container provides build/test isolation. You review the diff and decide what (if anything) to apply.
+Run AI coding agents on disposable repo clones. The agent works on a clone — it can't touch your real repo. An optional container (Podman or Docker) provides build/test isolation. You review the diff and decide what (if anything) to apply.
 
 ## Philosophy
 
@@ -116,9 +121,6 @@ $CONTAINER_RUNTIME run -d --name "yolo-<task-name>" --rm \
   -w /workspace \
   yolo-sandbox \
   sleep infinity
-
-# Docker note: if SELINUX_LABEL is empty, omit it from -v
-# Docker users may need: docker run ... instead of podman run ...
 
 # Tell the subagent: "Run builds/tests with: $CONTAINER_RUNTIME exec yolo-<task-name> <command>"
 ```
@@ -253,7 +255,7 @@ All tasks live under `~/.hermes/yolo/tasks/`:
 
 3. **Binary files**: `git diff` doesn't handle binary files well. If the agent modifies images or binaries, the diff will be empty. Warn the user.
 
-4. **SELinux `:Z` (Podman only)**: Always use `:Z` on bind mounts with Podman on Fedora/RHEL, or the container can't write to the workspace. Docker doesn't need this. The auto-detection handles this via `$SELINUX_LABEL`.
+4. **SELinux `:Z` (Podman only)**: Always use `:Z` on bind mounts with Podman on Fedora/RHEL, or the container can't write to the workspace. Docker doesn't need this — the auto-detection handles it via `$SELINUX_LABEL`.
 
 5. **Docker may need `sudo`**: Unlike Podman (rootless by default), Docker typically requires `sudo docker` unless the user is in the `docker` group. The subagent may need to prefix commands with `sudo` when using Docker.
 
@@ -263,9 +265,20 @@ All tasks live under `~/.hermes/yolo/tasks/`:
 
 8. **Build/test isolation**: By default, the subagent runs build/test commands on the host (in the sandbox clone). For untrusted code or projects with risky build scripts, use the optional container.
 
-## Implementation Notes for the Agent
+## Error Recovery
 
-When the user invokes `yolo run`:
+These are common failure modes and what to do about them:
+
+| Failure | Symptoms | Recovery |
+|---|---|---|
+| **Clone fails** | Network error, disk full, permission denied | Verify the repo path exists and is readable. For remote repos, check network/DNS. If disk is full, suggest `yolo clean` on old tasks. |
+| **Subagent timeout** | `delegate_task` returns no result after 2+ minutes | Check if the task was too broad — suggest a narrower prompt. The sandbox clone is still intact; run `yolo diff <task>` to see partial work. |
+| **Subagent error** | Subagent returns status=failed | Read the subagent's summary for the specific error. Common causes: missing build tools, syntax errors in generated code, test failures. The sandbox clone has the broken state — inspect with `git -C $SANDBOX/repo diff`. |
+| **Apply conflicts** | `git apply` fails with "patch does not apply" | The real repo has diverged from the clone (new commits landed). Options: (a) `git apply --reject` to apply what fits, manually resolve `.rej` files; (b) re-run `yolo run` to get a fresh clone; (c) apply the patch to the specific commit the clone was made from and cherry-pick. |
+| **Container won't start** | `podman run` / `docker run` fails | Check if the image exists (`$CONTAINER_RUNTIME images yolo-sandbox`). Build it if missing. Check port conflicts if the project needs network. SELinux denials: verify `:Z` on volume mount. |
+| **Container build/test failure** | Build commands return non-zero inside container | The container may be missing language-specific dependencies. Install them inside the container (`$CONTAINER_RUNTIME exec yolo-<task> dnf install -y <pkg>`) and retry. |
+
+## Implementation Notes for the Agent
 1. Load this skill + podman-helper (if container needed)
 2. Parse `<task-name>`, `<repo-path>`, and optional `[prompt]`
 3. If no prompt provided, ask the user: "What should the agent do?"
