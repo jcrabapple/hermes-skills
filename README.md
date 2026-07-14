@@ -113,6 +113,7 @@ All resume and career skills are organized under [`job-search/`](job-search/) fo
 | [`session-handoff`](session-handoff/) | Compact a session into a structured handoff document for delegate_task subagents or cross-session continuity. State not instructions, capture the "why", reference don't duplicate |
 | [`subagent-driven-development`](subagent-driven-development/) | Execute implementation plans via delegate_task subagents with 2-stage review (spec then quality). Includes the 5-part contract for autonomous loops with reward-hacking prohibition |
 | [`hermes-agent-skill-authoring`](hermes-agent-skill-authoring/) | Author in-repo SKILL.md files — frontmatter validation, directory placement, design philosophy, anti-patterns, ship checklist, cross-ecosystem import, and pre-publish audit scripts |
+| [`yolo-dev`](yolo-dev/) | Run AI coding agents on disposable repo clones. Clone → delegate → diff → review → apply. Optional container isolation (Podman/Docker). You're always the gatekeeper |
 
 ### Research
 
