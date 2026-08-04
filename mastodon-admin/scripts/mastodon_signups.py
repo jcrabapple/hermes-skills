@@ -25,11 +25,21 @@ API_BASE = f"https://{INSTANCE}/api/v1"
 TOKEN_FILE = os.path.expanduser("~/.hermes/secrets/mastodon_token")
 
 DMV_STATES = [
-    r'\bmaryland\b', r'\bmd\b', r'\bvirginia\b', r'\bva\b',
-    r'\bwashington\s+dc\b', r'\bdc\b', r'\bd\.?c\.?\b',
-    r'\bwest\s+virginia\b', r'\bwv\b',
-    r'\bdelaware\b', r'\bde\b',
-    r'\bpennsylvania\b', r'\bpa\b',
+    r'\bmaryland\b', r'\bvirginia\b',
+    r'\bwashington\s+dc\b', r'\bwashington\s+d\.c\.',
+    r'\bwest\s+virginia\b',
+    r'\bdelaware\b',
+    r'\bpennsylvania\b',
+]
+
+# Two-letter DMV state abbreviations. Matched UPPERCASE-only against the
+# original (case-preserving) invite text: lowercase "va"/"de"/"pa" collide
+# with Spanish/French words and informal English, lowercase "dc"/"md" with
+# unrelated acronyms. Uppercase keeps the real "I'm in MD" signal without
+# auto-approving a Spanish speaker on "va". See classify_account().
+DMV_STATE_ABBREVIATIONS = [
+    r'\bMD\b', r'\bVA\b', r'\bDC\b', r'\bD\.C\.', r'\bWV\b',
+    r'\bDE\b', r'\bPA\b',
 ]
 
 # Location tokens that commonly appear in Mastodon usernames. Used as a
@@ -184,7 +194,7 @@ SPAM_TOPICS = [
 
 NON_DMV_LOCATIONS = [
     # International
-    r'\buk\b', r'\bunited\s+kingdom\b', r'\blondon\b', r'\bscotland\b', r'\bglasgow\b',
+    r'\bunited\s+kingdom\b', r'\blondon\b', r'\bscotland\b', r'\bglasgow\b',
     r'\bgermany\b', r'\bbrazil\b', r'\bindia\b', r'\bnigeria\b', r'\bpakistan\b',
     r'\bphilippines\b', r'\bjapan\b', r'\baustralia\b', r'\bnew\s+zealand\b',
     r'\bwight\b', r'\blanguedoc\b', r'\baotearoa\b', r'\bwellington\b',
@@ -192,57 +202,75 @@ NON_DMV_LOCATIONS = [
     r'\blagos\b', r'\bkenya\b', r'\bnairobi\b',
     r'\bdubai\b', r'\bsydney\b', r'\bmelbourne\b',
     r'\btoronto\b', r'\bontario\b', r'\bcanada\b',
-    # US states outside DMV area
-    r'\bcalifornia\b', r'\bcali\b', r'\blos\s+angeles\b', r'\bla\b',
-    r'\bsan\s+francisco\b', r'\bsf\b', r'\bsan\s+diego\b',
+    # US states outside DMV area (two-letter codes live in
+    # NON_DMV_ABBREVIATIONS below — never as lowercase patterns here)
+    r'\bcalifornia\b', r'\bcali\b', r'\blos\s+angeles\b',
+    r'\bsan\s+francisco\b', r'\bsan\s+diego\b',
     r'\bsacramento\b', r'\bsan\s+jose\b', r'\boakland\b', r'\bfresno\b',
     r'\bnew\s+york\b', r'\bnyc\b', r'\bmanhattan\b', r'\brooklyn\b',
     r'\bqueens\b', r'\bbronx\b', r'\bbuffalo\b', r'\balbany\b',
-    r'\btexas\b', r'\btx\b', r'\baustin\b', r'\bhouston\b',
+    r'\btexas\b', r'\baustin\b', r'\bhouston\b',
     r'\bdallas\b', r'\bsan\s+antonio\b', r'\bfort\s+worth\b', r'\bel\s+paso\b',
-    r'\bflorida\b', r'\bfl\b', r'\bmiami\b', r'\borlando\b',
+    r'\bflorida\b', r'\bmiami\b', r'\borlando\b',
     r'\btampa\b', r'\bjacksonville\b', r'\btallahassee\b',
-    r'\bchicago\b', r'\billinois\b', r'\bil\b', r'\baurora\b', r'\bnaperville\b',
-    r'\bseattle\b', r'\bwashington\s+state\b', r'\bportland\b', r'\boregon\b', r'\bor\b',
-    r'\bphoenix\b', r'\barizona\b', r'\baz\b', r'\btucson\b', r'\bmesa\b',
-    r'\bdenver\b', r'\bcolorado\b', r'\bco\b', r'\bboulder\b',
-    r'\batlanta\b', r'\bgeorgia\b', r'\bga\b', r'\bsavannah\b',
-    r'\bboston\b', r'\bmassachusetts\b', r'\bma\b', r'\bcambridge\b',
-    r'\bdetroit\b', r'\bmichigan\b', r'\bmi\b', r'\bgrand\s+rapids\b',
-    r'\bminneapolis\b', r'\bminnesota\b', r'\bmn\b', r'\bst\s+paul\b',
-    r'\bkansas\s+city\b', r'\bmissouri\b', r'\bmo\b', r'\bst\s+louis\b',
-    r'\bnew\s+orleans\b', r'\blouisiana\b', r'\bla\b',
-    r'\bnashville\b', r'\btennessee\b', r'\btn\b', r'\bmemphis\b',
-    r'\bnorth\s+carolina\b', r'\bnc\b', r'\bcharlotte\b', r'\braleigh\b',
-    r'\bsouth\s+carolina\b', r'\bsc\b', r'\bcharleston\b', r'\bcolumbia\s+sc\b',
-    r'\bohio\b', r'\boh\b', r'\bcleveland\b', r'\bcolumbus\b', r'\bcincinnati\b',
-    r'\bindianapolis\b', r'\bindiana\b', r'\bin\b',
-    r'\bmilwaukee\b', r'\bwisconsin\b', r'\bwi\b', r'\bmadison\b',
-    r'\blas\s+vegas\b', r'\bnevada\b', r'\bnv\b', r'\breno\b',
-    r'\bsalt\s+lake\s+city\b', r'\butah\b', r'\but\b',
-    r'\balbuquerque\b', r'\bnew\s+mexico\b', r'\bnm\b',
-    r'\bomaha\b', r'\bnebraska\b', r'\bne\b',
-    r'\boklahoma\b', r'\bok\b', r'\boklahoma\s+city\b', r'\btulsa\b',
-    r'\bhonolulu\b', r'\bhawaii\b', r'\bhi\b',
-    r'\banchorage\b', r'\balaska\b', r'\bak\b',
+    r'\bchicago\b', r'\billinois\b', r'\baurora\b', r'\bnaperville\b',
+    r'\bseattle\b', r'\bwashington\s+state\b', r'\bportland\b', r'\boregon\b',
+    r'\bphoenix\b', r'\barizona\b', r'\btucson\b', r'\bmesa\b',
+    r'\bdenver\b', r'\bcolorado\b', r'\bboulder\b',
+    r'\batlanta\b', r'\bgeorgia\b', r'\bsavannah\b',
+    r'\bboston\b', r'\bmassachusetts\b', r'\bcambridge\b',
+    r'\bdetroit\b', r'\bmichigan\b', r'\bgrand\s+rapids\b',
+    r'\bminneapolis\b', r'\bminnesota\b', r'\bst\s+paul\b',
+    r'\bkansas\s+city\b', r'\bmissouri\b', r'\bst\s+louis\b',
+    r'\bnew\s+orleans\b', r'\blouisiana\b',
+    r'\bnashville\b', r'\btennessee\b', r'\bmemphis\b',
+    r'\bnorth\s+carolina\b', r'\bcharlotte\b', r'\braleigh\b',
+    r'\bsouth\s+carolina\b', r'\bcharleston\b', r'\bcolumbia\s+sc\b',
+    r'\bohio\b', r'\bcleveland\b', r'\bcolumbus\b', r'\bcincinnati\b',
+    r'\bindianapolis\b', r'\bindiana\b',
+    r'\bmilwaukee\b', r'\bwisconsin\b', r'\bmadison\b',
+    r'\blas\s+vegas\b', r'\bnevada\b', r'\breno\b',
+    r'\bsalt\s+lake\s+city\b', r'\butah\b',
+    r'\balbuquerque\b', r'\bnew\s+mexico\b',
+    r'\bomaha\b', r'\bnebraska\b',
+    r'\boklahoma\b', r'\boklahoma\s+city\b', r'\btulsa\b',
+    r'\bhonolulu\b', r'\bhawaii\b',
+    r'\banchorage\b', r'\balaska\b',
     # Common non-DMV US cities
     r'\bphilly\b', r'\bphiladelphia\b', r'\bpittsburgh\b', r'\bpgh\b',
-    r'\bnew\s+jersey\b', r'\bnj\b', r'\bnewark\b', r'\bjersey\s+city\b',
-    r'\bconnecticut\b', r'\bct\b', r'\bhartford\b',
-    r'\brhode\s+island\b', r'\bri\b', r'\bprovidence\b',
-    r'\bvermont\b', r'\bvt\b', r'\bburlington\b',
-    r'\bnew\s+hampshire\b', r'\bnh\b',
-    r'\bmaine\b', r'\bme\b', r'\bportland\s+me\b',
-    r'\biowa\b', r'\bia\b', r'\bdes\s+moines\b',
-    r'\bkansas\b', r'\bks\b', r'\bwichita\b',
-    r'\barkansas\b', r'\bar\b', r'\blittle\s+rock\b',
-    r'\bmississippi\b', r'\bms\b', r'\bjackson\s+ms\b',
-    r'\balabama\b', r'\bal\b', r'\bbirmingham\b', r'\bmontgomery\b',
-    r'\bkentucky\b', r'\bky\b', r'\blouisville\b', r'\blexington\b',
-    r'\bidaho\b', r'\bid\b', r'\bboise\b',
-    r'\bmontana\b', r'\bmt\b', r'\bbillings\b',
-    r'\bwyoming\b', r'\bwy\b', r'\bcheyenne\b',
-    r'\bsouth\s+dakota\b', r'\bsd\b', r'\bnorth\s+dakota\b', r'\bnd\b',
+    r'\bnew\s+jersey\b', r'\bnewark\b', r'\bjersey\s+city\b',
+    r'\bconnecticut\b', r'\bhartford\b',
+    r'\brhode\s+island\b', r'\bprovidence\b',
+    r'\bvermont\b', r'\bburlington\b',
+    r'\bnew\s+hampshire\b',
+    r'\bmaine\b', r'\bportland\s+me\b',
+    r'\biowa\b', r'\bdes\s+moines\b',
+    r'\bkansas\b', r'\bwichita\b',
+    r'\barkansas\b', r'\blittle\s+rock\b',
+    r'\bmississippi\b', r'\bjackson\s+ms\b',
+    r'\balabama\b', r'\bbirmingham\b', r'\bmontgomery\b',
+    r'\bkentucky\b', r'\blouisville\b', r'\blexington\b',
+    r'\bidaho\b', r'\bboise\b',
+    r'\bmontana\b', r'\bbillings\b',
+    r'\bwyoming\b', r'\bcheyenne\b',
+    r'\bsouth\s+dakota\b', r'\bnorth\s+dakota\b',
+]
+
+# Two-letter state/country codes that are NOT common English words. Matched
+# UPPERCASE-only against the original invite text, so "Austin, TX" rejects
+# but "it's ok" / "coffee or tea" / "email me" never match. Codes that double
+# as everyday words — in, ok, or, me, hi, la, ma, mo, oh, co, ms, id — are
+# deliberately ABSENT: a false negative is cheap (the account escalates to
+# Jason or gets caught by another signal), a false rejection loses a real
+# neighbor. Added 2026-08-04 after "hejzul" was mis-flagged "Non-DMV: in, ok"
+# for the English words in "ok, not in the profile".
+NON_DMV_ABBREVIATIONS = [
+    r'\bUK\b', r'\bSF\b', r'\bTX\b', r'\bFL\b', r'\bIL\b', r'\bAZ\b',
+    r'\bGA\b', r'\bMI\b', r'\bMN\b', r'\bTN\b', r'\bNC\b', r'\bSC\b',
+    r'\bWI\b', r'\bNV\b', r'\bUT\b', r'\bNM\b', r'\bNE\b', r'\bAK\b',
+    r'\bNJ\b', r'\bCT\b', r'\bRI\b', r'\bVT\b', r'\bNH\b', r'\bIA\b',
+    r'\bKS\b', r'\bAR\b', r'\bAL\b', r'\bKY\b', r'\bMT\b', r'\bWY\b',
+    r'\bSD\b', r'\bND\b',
 ]
 
 SPAM_EMAIL_DOMAINS = {
@@ -278,6 +306,9 @@ ADMIN_ACCOUNT_ID = os.environ.get("MASTODON_ADMIN_ID", "")
 
 
 def load_token():
+    token = os.environ.get("MASTODON_TOKEN")
+    if token:
+        return token
     with open(TOKEN_FILE) as f:
         return f.read().strip()
 
@@ -313,10 +344,11 @@ def api_request(endpoint, method="GET", fields=None):
         return {"error": str(e)}, 0
 
 
-def find_matches(text, patterns):
+def find_matches(text, patterns, case_sensitive=False):
     matches = []
+    flags = 0 if case_sensitive else re.IGNORECASE
     for pattern in patterns:
-        if re.search(pattern, text, re.IGNORECASE):
+        if re.search(pattern, text, flags):
             clean = pattern.replace(r'\b', '').replace(r'\s+', ' ')
             clean = clean.replace(r'\.', '').replace(r'-?\s*', ' ')
             clean = clean.strip()
@@ -337,10 +369,16 @@ def classify_account(account):
         return {"action": "skip", "reason": "Admin account"}
 
     dmv_matches = find_matches(text_lower, DMV_STATES + DMV_CITIES)
+    # Two-letter DMV abbreviations: uppercase-only vs. original text (see
+    # DMV_STATE_ABBREVIATIONS comment).
+    dmv_matches += find_matches(invite_request, DMV_STATE_ABBREVIATIONS, case_sensitive=True)
     spam_phrase_matches = find_matches(text_lower, SPAM_PHRASES)
     spam_topic_matches = find_matches(text_lower, SPAM_TOPICS)
     all_spam_matches = spam_phrase_matches + spam_topic_matches
     non_dmv_matches = find_matches(text_lower, NON_DMV_LOCATIONS)
+    # Two-letter non-DMV codes: uppercase-only vs. original text so common
+    # English words (in/or/me/ok...) can never trigger a rejection.
+    non_dmv_matches += find_matches(invite_request, NON_DMV_ABBREVIATIONS, case_sensitive=True)
     username_dmv_matches = find_matches(username_lower, DMV_USERNAME_PATTERNS)
     is_spam_email = email_domain in SPAM_EMAIL_DOMAINS
     # Also check for spam keywords anywhere in the email domain
