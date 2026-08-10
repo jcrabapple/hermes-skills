@@ -17,6 +17,32 @@ consumer-facing APIs.
 
 For US personal accounts, Plaid is read-only for any realistic budget-app use.
 
+### Sync Cadence — Interval, Not Real-Time
+
+Plaid does NOT offer real-time or instant sync. It polls institutions on a
+schedule and notifies you when new data is available.
+
+- **Default frequency**: 1–4 times per day, depending on institution and
+  account type. Plaid docs: "typically one or more times a day."
+- **Webhook-driven**: With `/transactions/sync` (modern endpoint), listen for
+  `SYNC_UPDATES_AVAILABLE` webhook → call `/transactions/sync` with cursor to
+  pull the delta (adds, modifications, removals).
+- **On-demand refresh**: `/transactions/refresh` is a **paid add-on** — you
+  must request access from Plaid. Forces an immediate check; same
+  `SYNC_UPDATES_AVAILABLE` webhook fires if new data found.
+- **No streaming**: There is no real-time transaction feed. Even with
+  `/transactions/refresh`, you're triggering a faster poll, not getting a
+  push stream.
+
+This means any budgeting app that relies on Plaid (which is almost all of
+them) will have stale data for hours. Mercury's direct API (+ webhooks) is
+the only way to get real-time data for a personal account.
+
+Sources:
+- https://plaid.com/docs/transactions/
+- https://plaid.com/docs/transactions/webhooks/
+- https://plaid.com/docs/transactions/sync-migration/
+
 ### Readable Products (US)
 
 | Product | What it gives you |
@@ -78,6 +104,47 @@ programmatic money movement between accounts.
 - **Pricing**: $240/year, billed annually via ACH on account opening
   anniversary (no monthly billing option). Breaks even at $7,500+ savings
   balance (3.25% APY). Free with Mercury Business account.
+
+### Mercury MCP on Personal vs Business Accounts
+
+Mercury's MCP, CLI, and REST API all work with **Mercury Personal** accounts —
+confirmed on Mercury's Personal Banking landing page: "Run your money with
+CLI, MCP, and API."
+
+**Official MCP caveat**: The hosted MCP at `mcp.mercury.com/mcp` uses OAuth
+2.0 with sessions that expire after ~3 days, requiring manual re-auth. This
+breaks cron-based automation.
+
+**Workaround**: Use personal API tokens (non-expiring) with the REST API
+directly, or use the community [Mercury-Enhanced-MCP](https://github.com/collinsb1/Mercury-Enhanced-MCP)
+which wraps personal API tokens to present an MCP interface without OAuth
+expiry. A read-only token is sufficient for budget tracking.
+
+### Budget App Landscape — Mercury Goes Through Plaid
+
+No mainstream personal budgeting app connects to Mercury via its direct API.
+Every app in the YNAB/Monarch/Copilot tier uses **Plaid** to connect to
+Mercury, which means you get Plaid's 1–4x/day sync, not Mercury's real-time
+capabilities.
+
+| App | Mercury Connection | Type |
+|-----|-------------------|------|
+| **YNAB** | Via Plaid (also MX) | Zero-based budgeting |
+| **Monarch Money** | Via Plaid (multi-aggregator) | Flexible budgeting |
+| **Copilot** | Via Plaid + proprietary | Dashboard-style (US only) |
+| **Buxfer** | Claims Mercury support | Lesser-known personal finance |
+| **QuickBooks, Xero** | Native Mercury API | Business accounting only |
+| **Puzzle, Kick, Frihet** | Native Mercury API | Startup accounting / CFO tools |
+
+Buxfer lists Mercury as a supported bank but it's unclear whether it uses
+Plaid or direct API. Even if direct, it's not in the same tier as YNAB or
+Monarch.
+
+The practical implication: if you want real-time Mercury data in a budgeting
+app, you're either (a) building it yourself against Mercury's API/MCP, or
+(b) using an AI agent (Hermes + Mercury MCP/REST API) as your budget tracker.
+There is no off-the-shelf personal budgeting app that takes advantage of
+Mercury's direct API.
 
 ### Three Integration Surfaces for Mercury
 
