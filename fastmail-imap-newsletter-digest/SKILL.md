@@ -235,6 +235,6 @@ This applies to any folder with spaces or special characters.
    **Diagnosis:** `grep OPENAI_BASE_URL ~/.hermes/.env` — if the value is empty after the `=`, that's the bug.
 6. **Timeout on large newsletter batches** — 11+ newsletters can exceed a 60-second timeout because Qwen 3.5 thinking model processes each one. The script itself handles this fine (no timeout built in), but if running manually for testing, use `timeout 180` to give it enough runway.
 7. **Folder name quoting** — folders with spaces need IMAP syntax `m.select('"Folder Name"')`
-8. **Always check AgentMail outbox** to confirm email actually left the sender: `python3 ~/.hermes/skills/agentmail/agentmail/scripts/agentmail_helper.py list-messages herman-the-hermes-agent@agentmail.to`
+8. **Always check AgentMail outbox** to confirm email actually left the sender: `python3 ~/.hermes/skills/agentmail/agentmail/scripts/agentmail_helper.py list-messages your-agent@agentmail.to`
 9. **Don't assume the user deleted emails** — if they say they didn't get today's digest but 15 digests are in Trash, they likely delete them after reading. Check the cron output dir first, then the AgentMail outbox, then Fastmail folders.
 10. **Newsletter body text built BEFORE the f-string** — construct the concatenated text as a separate variable, then interpolate it into the prompt template. Python f-strings are evaluated at definition time and can't reference variables defined inside them.

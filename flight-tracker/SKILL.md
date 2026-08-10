@@ -46,7 +46,7 @@ https://api.aviationstack.com/v1/flights
 
 ```bash
 # Track a specific flight
-curl -s "https://api.aviationstack.com/v1/flights?access_key=$AVIATIONSTACK_API_KEY&flight_iata=UA1749"
+curl -s "https://api.aviationstack.com/v1/flights?access_key=$AVIATIONSTACK_API_KEY&flight_iata=UA123"
 
 # All flights SFO → OGG today
 curl -s "https://api.aviationstack.com/v1/flights?access_key=$AVIATIONSTACK_API_KEY&dep_iata=SFO&arr_iata=OGG"
@@ -55,7 +55,7 @@ curl -s "https://api.aviationstack.com/v1/flights?access_key=$AVIATIONSTACK_API_
 curl -s "https://api.aviationstack.com/v1/flights?access_key=$AVIATIONSTACK_API_KEY&airline_iata=UA&date=2026-04-05"
 
 # Active flights only
-curl -s "https://api.aviationstack.com/v1/flights?access_key=$AVIATIONSTACK_API_KEY&flight_iata=UA1749&flight_status=active"
+curl -s "https://api.aviationstack.com/v1/flights?access_key=$AVIATIONSTACK_API_KEY&flight_iata=UA123&flight_status=active"
 ```
 
 ### Response Structure
@@ -94,7 +94,7 @@ When an airline confirmation email arrives in your AgentMail inbox:
 ### On-Demand Flight Check
 
 ```bash
-curl -s "https://api.aviationstack.com/v1/flights?access_key=$AVIATIONSTACK_API_KEY&flight_iata=UA1749" | \
+curl -s "https://api.aviationstack.com/v1/flights?access_key=$AVIATIONSTACK_API_KEY&flight_iata=UA123" | \
 python3 -c "
 import json, sys
 data = json.load(sys.stdin)
@@ -135,8 +135,8 @@ For personal tracking, keep a small file (e.g. `~/.hermes/travelogue/<trip>/flig
 
 ```json
 [
-  { "date": "2026-04-05", "flight": "UA1749", "from": "SFO", "to": "OGG" },
-  { "date": "2026-04-12", "flight": "UA1746", "from": "OGG", "to": "SFO" }
+  { "date": "2026-06-01", "flight": "UA123", "from": "SFO", "to": "LAX" },
+  { "date": "2026-06-08", "flight": "UA456", "from": "LAX", "to": "SFO" }
 ]
 ```
 

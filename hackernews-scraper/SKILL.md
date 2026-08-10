@@ -137,7 +137,7 @@ text_body = format_stories_as_text(stories)
 
 client = get_client()
 client.inboxes.messages.send(
-    inbox_id='herman-the-hermes-agent@agentmail.to',
+    inbox_id='your-agent@agentmail.to',
     to='your-email@example.com',
     subject='Weekly HackerNews Top 10',
     text=text_body,

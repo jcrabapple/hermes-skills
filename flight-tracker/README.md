@@ -45,18 +45,18 @@ cronjob(action="create", schedule="*/30 4-23 * * *",
 ## Example output
 
 ```
-UA1749 — active
+UA123 — active
   Departure: San Francisco International (SFO)
-    Terminal: 3, Gate: E12
-    Scheduled: 2026-04-05T15:30:00.000Z
-    Estimated: 2026-04-05T15:42:00.000Z
+    Terminal: 1, Gate: A12
+    Scheduled: 2026-06-01T15:30:00.000Z
+    Estimated: 2026-06-01T15:42:00.000Z
     Delay: 12 min
-  Arrival: Kahului Airport (OGG)
-    Terminal: 1, Gate: N/A
-    Scheduled: 2026-04-05T18:55:00.000Z
-    Baggage: 5
+  Arrival: Los Angeles International (LAX)
+    Terminal: 2, Gate: N/A
+    Scheduled: 2026-06-01T17:00:00.000Z
+    Baggage: 3
 
-🔔 Change detected: gate changed from E10 to E12, now delayed 12 minutes.
+🔔 Change detected: gate changed from A10 to A12, now delayed 12 minutes.
 ```
 
 ## Pitfalls
