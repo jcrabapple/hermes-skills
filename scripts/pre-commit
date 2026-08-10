@@ -1,0 +1,112 @@
+#!/usr/bin/env bash
+# Pre-commit hook: audit all staged skills for leaks before allowing commit.
+# Staged files are scanned for the same leak categories as
+# audit-skill-for-publish.sh, but applied to the git diff instead of
+# a directory tree. This catches leaks at commit time rather than at
+# publish time.
+#
+# Install: ln -s ../../scripts/pre-commit .git/hooks/pre-commit
+# Or copy: cp scripts/pre-commit .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
+#
+# Bypass (emergency only): SKIP_AUDIT=1 git commit -m "..."
+
+set -euo pipefail
+
+if [[ "${SKIP_AUDIT:-}" == "1" ]]; then
+  echo "⚠️  SKIP_AUDIT=1 — pre-commit audit bypassed"
+  exit 0
+fi
+
+# Only scan if there are staged changes
+if git diff --cached --quiet; then
+  exit 0
+fi
+
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM)
+if [[ -z "$STAGED_FILES" ]]; then
+  exit 0
+fi
+
+# Only scan text files
+TEXT_FILES=$(echo "$STAGED_FILES" | grep -E '\.(md|py|sh|bash|js|mjs|ts|yaml|yml|json|toml|txt)$' || true)
+if [[ -z "$TEXT_FILES" ]]; then
+  exit 0
+fi
+
+fail_count=0
+
+check_diff() {
+  local name="$1"
+  local pattern="$2"
+  local filter="${3:-cat}"
+
+  # Search the staged content (git diff --cached shows what will be committed)
+  local hits
+  hits=$(git diff --cached -U0 -- $TEXT_FILES | grep '^+' | grep -v '^+++' | grep -P "$pattern" 2>/dev/null | eval "$filter" || true)
+
+  if [[ -n "$hits" ]]; then
+    echo ""
+    echo "━━━ ✗ $name ━━━"
+    echo "$hits" | head -10 | sed 's/^/  /'
+    if [[ $(echo "$hits" | wc -l) -gt 10 ]]; then
+      echo "  ... and $(($(echo "$hits" | wc -l) - 10)) more"
+    fi
+    fail_count=$((fail_count + 1))
+  fi
+}
+
+echo "🔍 Pre-commit leak audit..."
+
+# API keys
+check_diff "API key (sk-*, pk_*, hex blobs)" \
+  '(sk-[a-zA-Z0-9]{16,}|pk_(live|test)_[a-zA-Z0-9]+|[a-f0-9]{32,})' \
+  "grep -viE '(example|sample|placeholder|your.?key|000000)'"
+
+# API key variable assignments with literal values
+check_diff "API key variable with literal value" \
+  "(API[_-]?KEY|SECRET|TOKEN|PASSWORD)\s*=\s*['\"][a-zA-Z0-9]{12,}['\"]" \
+  "grep -viE '(os\.environ|process\.env|\$\{?[A-Z_]+\}?|example|placeholder|your-)'"
+
+# Personal emails (not common placeholders)
+check_diff "Personal email address" \
+  '[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.(com|us|to|net|org|io)' \
+  "grep -viE '(@example\.com|@example\.org|@your-domain|@contact|@your-email|@hermesagent|@anthropic\.com|@openai\.com|@noreply|@agentmail\.to.*your-|@agentmail\.to.*inbox@|@agentmail\.to.*user@)'"
+
+# Personal AgentMail inbox IDs (real names before @agentmail.to)
+check_diff "AgentMail inbox ID (personal identifier)" \
+  '[a-z][a-z0-9._-]+@agentmail\.to' \
+  "grep -viE '(your-|inbox@|example@|user@|test@|placeholder)'"
+
+# Personal infra URLs
+check_diff "Personal infrastructure URL" \
+  'https?://[a-z0-9-]+\.(pgs\.sh|snakepit\.[a-z]+|trycloudflare\.com|heredotnow\.com|pikapod\.net|ngrok\.io|ngrok-free\.app)' \
+  "cat"
+
+# Flight numbers that aren't known-safe examples
+check_diff "Real flight number" \
+  '\b(UA|AA|DL|WN|AS|HA|B6|NK|F9)[0-9]{3,4}\b' \
+  "grep -viE '(UA123|AA456|DL789|WN001|AS001|HA001|B6001|NK001|F9001)'"
+
+# Phone numbers (full or partial)
+check_diff "Phone number" \
+  '\+1[0-9*()\s.-]{8,18}' \
+  "grep -viE '(\+1-XXX|\+1-REDACTED|\+1-555-555-5555)'"
+
+# Personal filesystem paths
+check_diff "Personal filesystem path" \
+  '(/home/[a-z]+/|/Users/[A-Za-z]+/)' \
+  "grep -viE '(/home/bb/|~/\.hermes|~/\.config|~/\.local|~/Documents/Last30Days)'"
+
+if [[ $fail_count -gt 0 ]]; then
+  echo ""
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  echo "  ✗ Audit failed: $fail_count potential leak(s)"
+  echo ""
+  echo "  Fix the hits above, then re-commit."
+  echo "  Emergency bypass: SKIP_AUDIT=1 git commit ..."
+  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+  exit 1
+fi
+
+echo "  ✓ Clean — no leaks detected"
+exit 0
