@@ -8,7 +8,7 @@ echo
 
 # Check SearXNG
 echo "Testing SearXNG connection..."
-if curl -s "https://searxng.snakepit.us/search?q=test&format=json" | python3 -c "import sys,json; d=json.load(sys.stdin); exit(0 if len(d.get('results', [])) > 0 else 1)" 2>/dev/null; then
+if curl -s "https://searxng.example.com/search?q=test&format=json" | python3 -c "import sys,json; d=json.load(sys.stdin); exit(0 if len(d.get('results', [])) > 0 else 1)" 2>/dev/null; then
     echo "✓ SearXNG is accessible"
 else
     echo "✗ SearXNG connection failed"

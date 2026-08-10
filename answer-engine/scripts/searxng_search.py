@@ -10,7 +10,7 @@ import urllib.request
 import json
 import time
 
-SEARXNG_BASE = "https://searxng.snakepit.us"
+SEARXNG_BASE = "https://searxng.example.com"
 
 def search(query, max_results=10):
     """Query SearXNG and return results list."""

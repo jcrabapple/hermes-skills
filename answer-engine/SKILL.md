@@ -27,8 +27,8 @@ See `research/deep-research/references/research-skill-routing.md` for the full r
    - `kagi_ask_page` — Best for understanding a specific URL's content
    - Note: `kagi_fastgpt` is deprecated — use `kagi_quick` instead
 2. **SearXNG** - Secondary, privacy-focused diversity (currently degraded — returns 0 results as of 2026-05; keep trying but don't rely on it)
-   - Instance: https://searxng.snakepit.us
-   - Query format: `https://searxng.snakepit.us/search?q={query}&format=json`
+   - Instance: https://searxng.example.com
+   - Query format: `https://searxng.example.com/search?q={query}&format=json`
 3. **web_search** - Not available in current toolset (stale reference, do not use)
 
 ## Workflow
@@ -268,7 +268,7 @@ python scripts/source_evaluator.py "https://url.com"
 ## Status
 
 - ✅ Kagi tools plugin (`kagi_search`, `kagi_quick`, `kagi_assistant`, etc.): Working, primary search backend
-- ⚠️ SearXNG: Connected but returning 0 results (snakepit.us, degraded since ~2026-05)
+- ⚠️ SearXNG: Connected but returning 0 results (example.com, degraded since ~2026-05)
 - ❌ `web_search`: Not available in current toolset
 - ✅ Obsidian Research folder: Exists
 - ✅ NanoGPT API key: Configured
