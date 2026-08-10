@@ -17,13 +17,13 @@ metadata:
 There are two places a SKILL.md can live:
 
 1. **User-local:** `~/.hermes/skills/<maybe-category>/<name>/SKILL.md` — personal, not shared. Created via `skill_manage(action='create')`.
-2. **In-repo (this skill is about this case):** `skills/<category>/<name>/SKILL.md` inside the hermes-agent repo — committed, shipped with the package. Use `write_file` + `git add`. `skill_manage(action='create')` does NOT target this tree.
+2. **In-repo (this skill is about this case):** `/home/bb/hermes-agent/skills/<category>/<name>/SKILL.md` — committed, shipped with the package. Use `write_file` + `git add`. `skill_manage(action='create')` does NOT target this tree.
 
 ## When to Use
 
 - User asks you to add a skill "in this branch / repo / commit"
 - You're committing a reusable workflow that should ship with hermes-agent
-- You're editing an existing skill under `skills/` in the hermes-agent repo (use `patch` for small edits, `write_file` for rewrites; `skill_manage` still works for patch on in-repo skills, but not for `create`)
+- You're editing an existing skill under `/home/bb/hermes-agent/skills/` (use `patch` for small edits, `write_file` for rewrites; `skill_manage` still works for patch on in-repo skills, but not for `create`)
 
 ## Required Frontmatter
 
@@ -149,7 +149,7 @@ See `references/cross-ecosystem-skill-import.md` for full details, format tables
 
 ## Publishing User-Local Skills to a Public Repo
 
-When you have a personal skill in `~/.hermes/skills/` that's useful enough to share (e.g., to a public GitHub repo), generalize it first.
+When you have a personal skill in `~/.hermes/skills/` that's useful enough to share (e.g., to a GitHub repo like `jcrabapple/hermes-skills`), generalize it first.
 
 ### Pre-Publish Authorship Check
 
@@ -178,7 +178,7 @@ Run this check on the skill before touching it:
 
 ### Generalization Checklist
 
-1. **Remove personal paths.** Replace hardcoded paths like `~/Documents/Obsidian Vault` or personal email addresses with configurable values.
+1. **Remove personal paths.** Replace hardcoded paths like `~/Documents/Obsidian Vault` or `jcrabapple@fastmail.us` with configurable values.
 2. **Add `config.example.yaml`.** A template with annotated comments showing every configurable value. Users copy to `config.yaml` and customize.
 3. **Write a standalone README.md.** The SKILL.md is for the agent; the README is for humans browsing GitHub. Include: what it does, prerequisites, quick start, configuration, how it works, pitfalls, and a "Using with Hermes Agent" install section.
 4. **Remove session-specific state.** Don't include `recent_topics.txt`, `last_run.log`, or other runtime files. The skill directory should be clean templates and code.
@@ -231,6 +231,8 @@ rm -rf /tmp/REPO
 
 - **Keep the local skill and shared skill in sync.** After pushing, update your local copy with the generalized version so your own setup uses the same config pattern.
 
+- **The \"example that isn't\" is the most common leak.** When skill authors paste their own working config, command output, or API responses as \"example data,\" they leak real values. This class accounted for all three leaks in the 2026-08-10 security sweep: real flight data (UA1749 SFO→OGG with dates/gates) used as README examples, a real AgentMail inbox in code blocks, and a personal SearXNG instance URL. The audit script catches all of these — the failure mode was that it wasn't run before commit. **Install the pre-commit hook.** Copy `scripts/pre-commit` to `.git/hooks/pre-commit` in every shared skills repo. A one-time setup that prevents a permanent leak.
+
 - **Git push may hang on HTTPS.** If the credential helper (e.g., `gh auth git-credential`) is unavailable, switch the remote to SSH: `git remote set-url origin git@github.com:OWNER/REPO.git`.
 
 - **Push timeouts on the first attempt are common.** If `git push -u origin <branch>` times out, retry once — the objects often transferred successfully and the second attempt just finishes the negotiation.
@@ -257,7 +259,7 @@ grep -rInE 'https?://[a-z0-9-]+\.(pikapod\.net|example\.com|ngrok\.io)' "$SKILL_
   || echo "✓ no personal instance URLs"
 
 # User-specific paths and home dir
-grep -rInE '(/home/[a-z]+/|~/Documents/Obsidian|/Users/[a-z]+/)' "$SKILL_DIR" \
+grep -rInE '(/home/jason/|~/Documents/Obsidian|/Users/[a-z]+/)' "$SKILL_DIR" \
   || echo "✓ no personal paths"
 
 # Personal usernames in service APIs
@@ -266,7 +268,7 @@ grep -rInE '(USERNAME|USER|owner) = .[a-z]+.' "$SKILL_DIR" --include='*.py' \
   || echo "✓ no hardcoded usernames"
 ```
 
-Treat any hit as a leak to clean up. The grep filters for `@example.com` etc. are deliberate — those are valid placeholder values in README templates. If your real values are different, expand the filter to include your real domain so the grep doesn't false-positive on every legitimate reference.
+Treat any hit as a leak to clean up. The grep filters for `@example.com` etc. are deliberate — those are valid placeholder values in README templates. If your real values are different (e.g., you use `@fastmail.us`), expand the filter to include your real domain so the grep doesn't false-positive on every legitimate reference.
 
 For skills that explicitly need a real User-Agent string (e.g., MusicBrainz requires a contact per [their policy](https://musicbrainz.org/doc/MusicBrainz_API/Rate_limiting)), call it out in the README: "Before using, edit the User-Agent in the SKILL.md to your own contact." Don't ship a generic-but-invalid string that will get throttled.
 
